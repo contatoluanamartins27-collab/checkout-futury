@@ -1006,293 +1006,310 @@
         </div>
     </div>
     
-    <script>
-        // --- CONFIGURAÇÃO DOS PRODUTOS (Preços em centavos) ---
-        const mainProduct = { name: "Fabrica de Amigurumis Premium", price: 100, image: "https://cdn-checkout.cakto.com.br/products/Criativocalculadoraamigurumicomamigurumi.jpg?width=180" };
-        const orderBumps = [
-            { id: "ob1", name: "Combo Princesas Disney", price: 560, image: "https://cdn-checkout.cakto.com.br/products/banerrcompreosite37901.jpg?width=180" },
-            { id: "ob2", name: "Combo de Natal", price: 680, image: "https://cdn-checkout.cakto.com.br/products/BANNERPAcotoNatal1.jpg?width=180" },
-            { id: "ob3", name: "Kit Almofadas", price: 790, image: "https://cdn-checkout.cakto.com.br/products/Capakitalmofadas1.png?width=180" }
-        ];
+<script>
+    // --- CONFIGURAÇÃO DOS PRODUTOS (Preços em centavos) ---
+    const mainProduct = { name: "Fabrica de Amigurumis Premium", price: 100, image: "https://cdn-checkout.cakto.com.br/products/Criativocalculadoraamigurumicomamigurumi.jpg?width=180" };
+    const orderBumps = [
+        { id: "ob1", name: "Combo Princesas Disney", price: 560, image: "https://cdn-checkout.cakto.com.br/products/banerrcompreosite37901.jpg?width=180" },
+        { id: "ob2", name: "Combo de Natal", price: 680, image: "https://cdn-checkout.cakto.com.br/products/BANNERPAcotoNatal1.jpg?width=180" },
+        { id: "ob3", name: "Kit Almofadas", price: 790, image: "https://cdn-checkout.cakto.com.br/products/Capakitalmofadas1.png?width=180" }
+    ];
+    
+    // --- Timer Countdown ---
+    let timeLeft = 15 * 60; // 15 minutos em segundos
+    const timerElement = document.getElementById('countdown-timer');
+    
+    function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         
-        // --- Timer Countdown ---
-        let timeLeft = 15 * 60; // 15 minutos em segundos
-        const timerElement = document.getElementById('countdown-timer');
-        
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (timeLeft > 0) {
-                timeLeft--;
-                setTimeout(updateTimer, 1000);
-            }
+        if (timeLeft > 0) {
+            timeLeft--;
+            setTimeout(updateTimer, 1000);
         }
-        updateTimer();
+    }
+    updateTimer();
+    
+    // --- Formatação de inputs ---
+    const phoneInput = document.getElementById('customer-phone');
+    
+    phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.slice(0, 11);
         
-        // --- Formatação de inputs ---
-        const phoneInput = document.getElementById('customer-phone');
+        let formatted = value;
+        if (value.length > 6) {
+            formatted = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        } else if (value.length > 2) {
+            formatted = value.replace(/(\d{2})(\d+)/, '($1) $2');
+        }
         
-        phoneInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 11) value = value.slice(0, 11);
-            
-            let formatted = value;
-            if (value.length > 6) {
-                formatted = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-            } else if (value.length > 2) {
-                formatted = value.replace(/(\d{2})(\d+)/, '($1) $2');
-            }
-            
-            e.target.value = formatted;
+        e.target.value = formatted;
+    });
+    
+    // --- Atualização do resumo ---
+    const summaryItemsDiv = document.getElementById('summary-items');
+    const totalPriceDisplay = document.getElementById('total-price-display');
+    
+    function formatPrice(priceInCents) {
+        return (priceInCents / 100).toLocaleString('pt-BR', { 
+            style: 'currency', 
+            currency: 'BRL' 
         });
+    }
+    
+    function updateSummary() {
+        let currentTotal = mainProduct.price;
         
-        // --- Atualização do resumo ---
-        const summaryItemsDiv = document.getElementById('summary-items');
-        const totalPriceDisplay = document.getElementById('total-price-display');
-        
-        function formatPrice(priceInCents) {
-            return (priceInCents / 100).toLocaleString('pt-BR', { 
-                style: 'currency', 
-                currency: 'BRL' 
-            });
-        }
-        
-        function updateSummary() {
-            let currentTotal = mainProduct.price;
-            
-            // Sempre mostrar o produto principal
-            let summaryHTML = `
-                <div class="summary-item">
-                    <div class="summary-item-info">
-                        <img src="${mainProduct.image}" alt="${mainProduct.name}" class="summary-item-image">
-                        <span class="summary-item-name">${mainProduct.name}</span>
-                    </div>
-                    <span class="summary-item-price">${formatPrice(mainProduct.price)}</span>
+        // Sempre mostrar o produto principal
+        let summaryHTML = `
+            <div class="summary-item">
+                <div class="summary-item-info">
+                    <img src="${mainProduct.image}" alt="${mainProduct.name}" class="summary-item-image">
+                    <span class="summary-item-name">${mainProduct.name}</span>
                 </div>
-            `;
-            
-            // Adicionar order bumps selecionados
-            orderBumps.forEach(bump => {
-                const checkbox = document.getElementById(bump.id);
-                if (checkbox && checkbox.checked) {
-                    currentTotal += bump.price;
-                    summaryHTML += `
-                        <div class="summary-item">
-                            <div class="summary-item-info">
-                                <img src="${bump.image}" alt="${bump.name}" class="summary-item-image">
-                                <span class="summary-item-name">${bump.name}</span>
-                            </div>
-                            <span class="summary-item-price">+${formatPrice(bump.price)}</span>
+                <span class="summary-item-price">${formatPrice(mainProduct.price)}</span>
+            </div>
+        `;
+        
+        // Adicionar order bumps selecionados
+        orderBumps.forEach(bump => {
+            const checkbox = document.getElementById(bump.id);
+            if (checkbox && checkbox.checked) {
+                currentTotal += bump.price;
+                summaryHTML += `
+                    <div class="summary-item">
+                        <div class="summary-item-info">
+                            <img src="${bump.image}" alt="${bump.name}" class="summary-item-image">
+                            <span class="summary-item-name">${bump.name}</span>
                         </div>
-                    `;
-                }
-            });
-            
-            summaryItemsDiv.innerHTML = summaryHTML;
-            totalPriceDisplay.textContent = formatPrice(currentTotal);
-        }
-        
-        // Event listeners para order bumps
-        document.querySelectorAll('.order-bump-add-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                updateSummary();
-                updateOrderBumpStyle(e.target);
-            });
-        });
-
-        document.querySelectorAll('.order-bump').forEach(bump => {
-            bump.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A') return;
-
-                const checkbox = bump.querySelector('.order-bump-add-checkbox');
-                if (e.target !== checkbox && e.target.closest('label') !== checkbox.parentElement) {
-                    checkbox.checked = !checkbox.checked;
-                    checkbox.dispatchEvent(new Event('change'));
-                }
-            });
-        });
-
-        function updateOrderBumpStyle(checkbox) {
-            const orderBump = checkbox.closest('.order-bump');
-            if (checkbox.checked) {
-                orderBump.classList.add('selected');
-            } else {
-                orderBump.classList.remove('selected');
-            }
-        }
-        
-        // --- Validação do formulário ---
-        function validateForm() {
-            const name = document.getElementById('customer-name').value.trim();
-            const phone = document.getElementById('customer-phone').value.trim();
-            
-            if (!name || !phone) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
-                return false;
-            }
-            
-            // Validar telefone
-            const phoneNumbers = phone.replace(/\D/g, '');
-            if (phoneNumbers.length < 10) {
-                alert('Por favor, insira um telefone válido.');
-                return false;
-            }
-            
-            return true;
-        }
-        
-        // --- Geração do PIX e Verificação ---
-        const payButton = document.getElementById('pay-button');
-        const pixModal = document.getElementById('pix-modal');
-        const qrCodeImg = document.getElementById('qr-code-img');
-        const pixCodeInput = document.getElementById('pix-code-input');
-        const copyPixBtn = document.getElementById('copy-pix-btn');
-        let pixTimerInterval;
-        let paymentCheckInterval; // Variável para controlar o loop de verificação
-        
-        payButton.addEventListener('click', handlePayment);
-        
-        function startPixTimer(duration) {
-            let timer = duration;
-            const minutesEl = document.getElementById('pix-timer-minutes');
-            const secondsEl = document.getElementById('pix-timer-seconds');
-
-            clearInterval(pixTimerInterval);
-
-            pixTimerInterval = setInterval(function () {
-                const minutes = Math.floor(timer / 60);
-                const seconds = timer % 60;
-
-                minutesEl.textContent = minutes.toString().padStart(2, '0');
-                secondsEl.textContent = seconds.toString().padStart(2, '0');
-
-                if (--timer < 0) {
-                    clearInterval(pixTimerInterval);
-                    pixModal.style.display = 'none';
-                    alert('O tempo para pagamento do PIX expirou.');
-                }
-            }, 1000);
-        }
-
-        async function handlePayment() {
-            if (!validateForm()) {
-                return;
-            }
-            
-            // Calcular valor total
-            let finalValueInCents = mainProduct.price;
-            orderBumps.forEach(bump => {
-                const checkbox = document.getElementById(bump.id);
-                if (checkbox && checkbox.checked) {
-                    finalValueInCents += bump.price;
-                }
-            });
-            
-            payButton.textContent = 'Gerando PIX...';
-            payButton.disabled = true;
-            
-            try {
-                // Envia para o PHP (save_customer.php)
-                const response = await fetch('save_customer.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        valueInCents: finalValueInCents,
-                        customer: {
-                            name: document.getElementById('customer-name').value,
-                            phone: document.getElementById('customer-phone').value.replace(/\D/g, '')
-                        }
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Não foi possível gerar o PIX.');
-                }
-                
-                const pixData = await response.json();
-                
-                // Mostrar modal com QR Code
-                qrCodeImg.src = pixData.qr_code_base64;
-                pixCodeInput.value = pixData.qr_code;
-                pixModal.style.display = 'flex';
-                
-                // --- LINHA NOVA: MUDA A URL PARA /CHECKOUT ---
-                window.history.pushState({}, "", "/checkout");
-
-                startPixTimer(15 * 60);
-
-                // --- NOVO: LÓGICA DE VERIFICAÇÃO AUTOMÁTICA ---
-                const idDoCliente = pixData.local_id; // ID que veio do PHP
-                const statusDiv = document.querySelector('.payment-status');
-                const statusTexto = statusDiv.querySelector('span');
-
-                // Limpa verificação anterior se houver
-                if(paymentCheckInterval) clearInterval(paymentCheckInterval);
-
-                // Loop a cada 3 segundos
-                paymentCheckInterval = setInterval(async () => {
-                    try {
-                        const req = await fetch(`check_status.php?id=${idDoCliente}`);
-                        const res = await req.json();
-
-                        if (res.status === 'pago') {
-                            clearInterval(paymentCheckInterval); // Para o loop
-
-                            // Muda visual para sucesso (Verde)
-                            statusDiv.style.backgroundColor = '#dcfce7'; 
-                            statusDiv.style.border = '1px solid #16a34a';
-                            statusDiv.querySelector('svg').style.display = 'none'; // Esconde spinner
-                            statusTexto.innerHTML = '✅ <b>PAGAMENTO APROVADO!</b>';
-                            statusTexto.style.color = '#15803d';
-                            
-                            document.querySelector('.approval-notice').style.display = 'none';
-
-                            setTimeout(() => {
-                                window.location.href = "obrigado.html"; 
-                            }, 1500);
-                        }
-                    } catch (erro) {
-                        console.error("Erro verificação:", erro);
-                    }
-                }, 3000);
-            } // Closing brace added here
-            } // Add this closing brace to fix the function
-                
-
-        
-        // Copiar código PIX
-        copyPixBtn.addEventListener('click', () => {
-            pixCodeInput.select();
-            document.execCommand('copy');
-            
-            const originalText = copyPixBtn.querySelector('span').textContent;
-            copyPixBtn.querySelector('span').textContent = '✓ Copiado!';
-            
-            setTimeout(() => {
-                copyPixBtn.querySelector('span').textContent = originalText;
-            }, 2000);
-        });
-        
-        // Fechar modal ao clicar fora
-        pixModal.addEventListener('click', (e) => {
-            if (e.target === pixModal) {
-                pixModal.style.display = 'none';
-                clearInterval(pixTimerInterval);
-                clearInterval(paymentCheckInterval);
-
-                // --- LINHA NOVA: VOLTA A URL PARA O INÍCIO ---
-                window.history.pushState({}, "", "/");
+                        <span class="summary-item-price">+${formatPrice(bump.price)}</span>
+                    </div>
+                `;
             }
         });
         
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', () => {
+        summaryItemsDiv.innerHTML = summaryHTML;
+        totalPriceDisplay.textContent = formatPrice(currentTotal);
+    }
+    
+    // Event listeners para order bumps
+    document.querySelectorAll('.order-bump-add-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
             updateSummary();
-            document.querySelectorAll('.order-bump-add-checkbox').forEach(updateOrderBumpStyle);
+            updateOrderBumpStyle(e.target);
         });
-    </script>
+    });
+
+    document.querySelectorAll('.order-bump').forEach(bump => {
+        bump.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') return;
+
+            const checkbox = bump.querySelector('.order-bump-add-checkbox');
+            if (e.target !== checkbox && e.target.closest('label') !== checkbox.parentElement) {
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+        });
+    });
+
+    function updateOrderBumpStyle(checkbox) {
+        const orderBump = checkbox.closest('.order-bump');
+        if (checkbox.checked) {
+            orderBump.classList.add('selected');
+        } else {
+            orderBump.classList.remove('selected');
+        }
+    }
+    
+    // --- Validação do formulário ---
+    function validateForm() {
+        const name = document.getElementById('customer-name').value.trim();
+        const phone = document.getElementById('customer-phone').value.trim();
+        
+        if (!name || !phone) {
+            alert('Por favor, preencha todos os campos obrigatórios.');
+            return false;
+        }
+        
+        // Validar telefone
+        const phoneNumbers = phone.replace(/\D/g, '');
+        if (phoneNumbers.length < 10) {
+            alert('Por favor, insira um telefone válido.');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // --- Geração do PIX e Verificação ---
+    const payButton = document.getElementById('pay-button');
+    const pixModal = document.getElementById('pix-modal');
+    const qrCodeImg = document.getElementById('qr-code-img');
+    const pixCodeInput = document.getElementById('pix-code-input');
+    const copyPixBtn = document.getElementById('copy-pix-btn');
+    let pixTimerInterval;
+    let paymentCheckInterval; // Variável para controlar o loop de verificação
+    
+    payButton.addEventListener('click', handlePayment);
+    
+    function startPixTimer(duration) {
+        let timer = duration;
+        const minutesEl = document.getElementById('pix-timer-minutes');
+        const secondsEl = document.getElementById('pix-timer-seconds');
+
+        clearInterval(pixTimerInterval);
+
+        pixTimerInterval = setInterval(function () {
+            const minutes = Math.floor(timer / 60);
+            const seconds = timer % 60;
+
+            minutesEl.textContent = minutes.toString().padStart(2, '0');
+            secondsEl.textContent = seconds.toString().padStart(2, '0');
+
+            if (--timer < 0) {
+                clearInterval(pixTimerInterval);
+                pixModal.style.display = 'none';
+                alert('O tempo para pagamento do PIX expirou.');
+            }
+        }, 1000);
+    }
+
+    async function handlePayment() {
+        if (!validateForm()) {
+            return;
+        }
+        
+        // Calcular valor total
+        let finalValueInCents = mainProduct.price;
+        orderBumps.forEach(bump => {
+            const checkbox = document.getElementById(bump.id);
+            if (checkbox && checkbox.checked) {
+                finalValueInCents += bump.price;
+            }
+        });
+        
+        payButton.textContent = 'Gerando PIX...';
+        payButton.disabled = true;
+        
+        try {
+            // Envia para o PHP (save_customer.php)
+            const response = await fetch('save_customer.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    valueInCents: finalValueInCents,
+                    customer: {
+                        name: document.getElementById('customer-name').value,
+                        phone: document.getElementById('customer-phone').value.replace(/\D/g, '')
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Não foi possível gerar o PIX.');
+            }
+            
+            const pixData = await response.json();
+            
+            // Mostrar modal com QR Code
+            qrCodeImg.src = pixData.qr_code_base64;
+            pixCodeInput.value = pixData.qr_code;
+            pixModal.style.display = 'flex';
+            
+            // --- LINHA NOVA: MUDA A URL PARA /CHECKOUT ---
+            window.history.pushState({}, "", "/checkout");
+
+            startPixTimer(15 * 60);
+
+            // --- NOVO: LÓGICA DE VERIFICAÇÃO AUTOMÁTICA ---
+            const idDoCliente = pixData.local_id; // ID que veio do PHP
+            const statusDiv = document.querySelector('.payment-status');
+            const statusTexto = statusDiv.querySelector('span');
+
+            // Limpa verificação anterior se houver
+            if(paymentCheckInterval) clearInterval(paymentCheckInterval);
+
+            // Loop a cada 3 segundos
+            paymentCheckInterval = setInterval(async () => {
+                try {
+                    const req = await fetch(`check_status.php?id=${idDoCliente}`);
+                    const res = await req.json();
+
+                    if (res.status === 'pago') {
+                        clearInterval(paymentCheckInterval); // Para o loop
+
+                        // Muda visual para sucesso (Verde)
+                        statusDiv.style.backgroundColor = '#dcfce7'; 
+                        statusDiv.style.border = '1px solid #16a34a';
+                        statusDiv.querySelector('svg').style.display = 'none'; // Esconde spinner
+                        statusTexto.innerHTML = '✅ <b>PAGAMENTO APROVADO!</b>';
+                        statusTexto.style.color = '#15803d';
+                        
+                        document.querySelector('.approval-notice').style.display = 'none';
+
+                        setTimeout(() => {
+                            window.location.href = "obrigado.html"; 
+                        }, 1500);
+                    }
+                } catch (erro) {
+                    console.error("Erro verificação:", erro);
+                }
+            }, 3000);
+            
+            // Dispara evento de checkout do Pinterest
+            try {
+                let finalValue = finalValueInCents / 100;
+                pintrk('track', 'checkout', {
+                    event_id: 'checkout_' + new Date().getTime(),
+                    value: finalValue.toFixed(2),
+                    order_quantity: 1,
+                    currency: 'BRL'
+                });
+            } catch (e) { console.error('Erro Pinterest:', e); }
+            
+        } catch (error) {
+            console.error('Erro na geração do PIX:', error);
+            alert(error.message);
+        } finally {
+            payButton.textContent = 'Pagar com PIX';
+            payButton.disabled = false;
+        }
+    }
+    
+    // Copiar código PIX
+    copyPixBtn.addEventListener('click', () => {
+        pixCodeInput.select();
+        document.execCommand('copy');
+        
+        const originalText = copyPixBtn.querySelector('span').textContent;
+        copyPixBtn.querySelector('span').textContent = '✓ Copiado!';
+        
+        setTimeout(() => {
+            copyPixBtn.querySelector('span').textContent = originalText;
+        }, 2000);
+    });
+    
+    // Fechar modal ao clicar fora
+    pixModal.addEventListener('click', (e) => {
+        if (e.target === pixModal) {
+            pixModal.style.display = 'none';
+            clearInterval(pixTimerInterval);
+            clearInterval(paymentCheckInterval);
+
+            // --- LINHA NOVA: VOLTA A URL PARA O INÍCIO ---
+            window.history.pushState({}, "", "/");
+        }
+    });
+    
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+        updateSummary();
+        document.querySelectorAll('.order-bump-add-checkbox').forEach(updateOrderBumpStyle);
+    });
+</script>
 </body>
 </html>
+

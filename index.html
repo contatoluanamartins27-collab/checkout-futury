@@ -1259,15 +1259,7 @@
                 }
             }, 3000);
             
-            // Dispara evento de checkout do Pinterest
-            try {
-                let finalValue = finalValueInCents / 100;
-                pintrk('track', 'checkout', {
-                    event_id: 'checkout_' + new Date().getTime(),
-                    value: finalValue.toFixed(2),
-                    order_quantity: 1,
-                    currency: 'BRL'
-                });
+
             } catch (e) { console.error('Erro Pinterest:', e); }
             
         } catch (error) {
@@ -1312,4 +1304,5 @@
 </script>
 </body>
 </html>
+
 

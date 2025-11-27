@@ -16,7 +16,7 @@
           r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
         pintrk('load', '2613447856261');
         pintrk('page');
-        pintrk('track', 'checkout', { value: 1.00, currency: 'BRL' });
+        pintrk('track', 'checkout', { value: 1.00, currency: 'BRL' order_id: purchaseData.order_id, event_id: 'checkout_' + purchaseData.order_id });
     </script>
 </head>
 <body class="bg-gray-50 h-screen flex items-center justify-center p-4">
@@ -47,3 +47,4 @@
 </body>
 
 </html>
+

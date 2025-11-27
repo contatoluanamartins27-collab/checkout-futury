@@ -15,7 +15,7 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: process.env.DB_PORT,
-    ssl: { rejectUnauthorized: true }, // Obrigatório para TiDB
+    ssl: { rejectUnauthorized: true },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -23,33 +23,31 @@ const pool = mysql.createPool({
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '.'))); // Serve o HTML
+app.use(express.static(path.join(__dirname, '.')));
 
-// --- ROTAS DO CHECKOUT ---
-
-// 1. Buscar Produtos
+// --- ROTA: BUSCAR PRODUTOS ---
 app.get('/get_products.php', async (req, res) => {
     try {
         const [rows] = await pool.query("SELECT * FROM products WHERE active = 1 ORDER BY type DESC, id ASC");
         res.json(rows);
     } catch (error) {
-        console.error(error);
+        console.error("Erro produtos:", error);
         res.json([]);
     }
 });
 
-// 2. Salvar Cliente e Gerar Pix
+// --- ROTA: SALVAR CLIENTE E GERAR PIX ---
 app.post('/save_customer.php', async (req, res) => {
     const { customer, valueInCents } = req.body;
     try {
-        // Salva no banco
-        const [result] = await pool.execute(
+        // 1. Salva cliente
+        const [result] = await pool.query(
             "INSERT INTO customers (name, phone, valor, status) VALUES (?, ?, ?, 'pendente')",
             [customer.name, customer.phone, valueInCents]
         );
         const customerId = result.insertId;
 
-        // Gera Pix
+        // 2. Gera Pix na PushInPay
         const webhookUrl = `${process.env.BASE_URL}/webhook`;
         const pushRes = await fetch('https://api.pushinpay.com.br/api/pix/cashIn', {
             method: 'POST',
@@ -64,42 +62,63 @@ app.post('/save_customer.php', async (req, res) => {
         const pixData = await pushRes.json();
         if (!pushRes.ok) throw new Error(pixData.message || 'Erro API Pix');
 
-        // Atualiza TXID
-        await pool.execute('UPDATE customers SET txid = ? WHERE id = ?', [pixData.id, customerId]);
+        // 3. Atualiza TXID no banco
+        await pool.query('UPDATE customers SET txid = ? WHERE id = ?', [pixData.id, customerId]);
 
         res.json({ ...pixData, local_id: customerId });
 
     } catch (error) {
-        console.error(error);
+        console.error("Erro criar pix:", error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// 3. Checar Status
+// --- ROTA: CHECAR STATUS (Para o Checkout) ---
 app.get('/check_status.php', async (req, res) => {
     try {
-        const [rows] = await pool.execute("SELECT status FROM customers WHERE id = ?", [req.query.id]);
+        const [rows] = await pool.query("SELECT status FROM customers WHERE id = ?", [req.query.id]);
         res.json({ status: rows.length > 0 ? rows[0].status : 'erro' });
     } catch (error) {
         res.json({ status: 'erro' });
     }
 });
 
-// --- ROTA WEBHOOK ---
+// --- ROTA: WEBHOOK (CORRIGIDA E BLINDADA) ---
 app.post('/webhook', async (req, res) => {
-    const { id, status } = req.body;
-    if (status === 'paid' || status === 'approved') {
-        try {
-            await pool.execute('UPDATE customers SET status = "pago" WHERE txid = ?', [id]);
-            console.log("Pagamento Confirmado:", id);
-        } catch (e) { console.error(e); }
+    try {
+        console.log("🔔 Webhook recebido:", req.body); // Vai aparecer no Log do Render
+
+        const { id, status, transaction_id } = req.body;
+        
+        // O ID da transação pode vir como 'id' ou 'transaction_id'
+        const txid = id || transaction_id;
+        
+        // Normaliza o status (para minúsculo)
+        const statusLower = status ? status.toLowerCase() : '';
+
+        if (statusLower === 'paid' || statusLower === 'approved') {
+            console.log(`Tentando aprovar TXID: ${txid}`);
+            
+            // Atualiza para PAGO
+            const [updateResult] = await pool.query(
+                'UPDATE customers SET status = "pago" WHERE txid = ?', 
+                [txid]
+            );
+            
+            console.log("Linhas afetadas no banco:", updateResult.affectedRows);
+        }
+
+        // Retorna 200 OK para a PushInPay parar de mandar erro
+        res.status(200).json({ received: true });
+
+    } catch (error) {
+        console.error("❌ ERRO NO WEBHOOK:", error);
+        // Retornamos 500 aqui só para você ver o erro no painel da PushInPay se der ruim
+        res.status(500).json({ error: error.message });
     }
-    res.send('OK');
 });
 
 // --- ROTAS DO ADMIN ---
-
-// Pegar dados gerais
 app.get('/api/admin-data', async (req, res) => {
     try {
         const [pago] = await pool.query("SELECT SUM(valor) as total, COUNT(*) as qtd FROM customers WHERE status = 'pago'");
@@ -113,18 +132,17 @@ app.get('/api/admin-data', async (req, res) => {
     }
 });
 
-// Criar/Editar Produtos
 app.post('/api/admin-product', async (req, res) => {
     const { action, id, type, name, price, image, description } = req.body;
     try {
         let priceCents = price ? parseInt(parseFloat(price.replace(',', '.').replace('.', '')) * 100) : 0;
 
         if (action === 'create') {
-            await pool.execute("INSERT INTO products (type, name, price, image_url, description, active) VALUES (?, ?, ?, ?, ?, 1)", [type, name, priceCents, image, description]);
+            await pool.query("INSERT INTO products (type, name, price, image_url, description, active) VALUES (?, ?, ?, ?, ?, 1)", [type, name, priceCents, image, description]);
         } else if (action === 'edit') {
-            await pool.execute("UPDATE products SET type=?, name=?, price=?, image_url=?, description=? WHERE id=?", [type, name, priceCents, image, description, id]);
+            await pool.query("UPDATE products SET type=?, name=?, price=?, image_url=?, description=? WHERE id=?", [type, name, priceCents, image, description, id]);
         } else if (action === 'delete') {
-            await pool.execute("DELETE FROM products WHERE id=?", [id]);
+            await pool.query("DELETE FROM products WHERE id=?", [id]);
         }
         res.json({ success: true });
     } catch (error) {

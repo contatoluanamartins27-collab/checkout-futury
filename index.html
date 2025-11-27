@@ -1184,8 +1184,14 @@
     }
 
 async function handlePayment() {
-            if (!validateForm()) {
-                return;
+            // Nova validação que inclui o e-mail
+            const name = document.getElementById('customer-name').value.trim();
+            const email = document.getElementById('customer-email').value.trim();
+            const phone = document.getElementById('customer-phone').value.trim();
+
+            if (!name || !phone || !email) {
+                alert('Por favor, preencha nome, e-mail e celular.');
+                return false;
             }
             
             // Calcular valor total
@@ -1231,6 +1237,15 @@ async function handlePayment() {
 
                 startPixTimer(15 * 60);
 
+
+                // --- SALVA DADOS PARA A PÁGINA DE OBRIGADO ---
+                localStorage.setItem('purchaseData', JSON.stringify({
+                    value: (finalValueInCents / 100).toFixed(2),
+                    email: email, // O e-mail que pegamos lá em cima
+                    order_id: pixData.local_id // O ID do pedido que veio do servidor
+                }));
+
+                
                 // Inicia a verificação de pagamento
                 const idDoCliente = pixData.local_id;
                 const statusDiv = document.querySelector('.payment-status');
@@ -1307,6 +1322,7 @@ async function handlePayment() {
 </script>
 </body>
 </html>
+
 
 
 

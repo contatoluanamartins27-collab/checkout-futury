@@ -77,40 +77,47 @@
         let currentAction = 'create';
 
         function showTab(tab) {
-            document.getElementById('tab-dashboard').classList.add('hidden');
-            document.getElementById('tab-products').classList.add('hidden');
-            document.getElementById('tab-' + tab).classList.remove('hidden');
+            document.getElementById('tab-dashboard').classList.toggle('hidden', tab !== 'dashboard');
+            document.getElementById('tab-products').classList.toggle('hidden', tab !== 'products');
         }
 
         async function loadData() {
-            const res = await fetch('/api/admin-data').then(r => r.json());
-            
-            // Dashboard
-            document.getElementById('dash-faturamento').innerText = (res.pago.total/100).toLocaleString('pt-br',{style:'currency', currency:'BRL'});
-            document.getElementById('dash-pagas').innerText = res.pago.qtd;
-            document.getElementById('dash-pendentes').innerText = res.pendente.qtd;
+            try {
+                const res = await fetch('/api/admin-data').then(r => r.json());
+                
+                // Dashboard
+                document.getElementById('dash-faturamento').innerText = (res.pago.total/100).toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+                document.getElementById('dash-pagas').innerText = res.pago.qtd;
+                document.getElementById('dash-pendentes').innerText = res.pendente.qtd;
 
-            // Tabela
-            document.getElementById('sales-table').innerHTML = res.ultimas_vendas.map(v => `
-                <tr>
-                    <td class="p-4 text-white">${v.name} <br> <small class="text-slate-500">${v.phone}</small></td>
-                    <td class="p-4 text-white">${(v.valor/100).toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${v.status === 'pago' ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}">${v.status}</span></td>
-                </tr>
-            `).join('');
+                // Tabela (ATUALIZADA PARA MOSTRAR E-MAIL)
+                document.getElementById('sales-table').innerHTML = res.ultimas_vendas.map(v => `
+                    <tr>
+                        <td class="p-4">
+                            <div class="text-white font-bold">${v.name}</div>
+                            <div class="text-xs text-slate-400 mt-1">${v.email || 'E-mail não informado'}</div>
+                            <div class="text-xs text-slate-500">${v.phone}</div>
+                        </td>
+                        <td class="p-4 text-white font-bold">${(v.valor/100).toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</td>
+                        <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${v.status === 'pago' ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}">${v.status}</span></td>
+                    </tr>
+                `).join('');
 
-            // Produtos
-            document.getElementById('products-list').innerHTML = res.produtos.map(p => `
-                <div class="bg-slate-800 p-4 rounded flex gap-4 items-center border border-slate-700">
-                    <img src="${p.image_url}" class="w-16 h-16 rounded object-cover">
-                    <div class="flex-1">
-                        <h3 class="text-white font-bold">${p.name}</h3>
-                        <p class="text-slate-400 text-sm">${(p.price/100).toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</p>
+                // Produtos
+                document.getElementById('products-list').innerHTML = res.produtos.map(p => `
+                    <div class="bg-slate-800 p-4 rounded flex gap-4 items-center border border-slate-700">
+                        <img src="${p.image_url}" class="w-16 h-16 rounded object-cover">
+                        <div class="flex-1">
+                            <h3 class="text-white font-bold">${p.name}</h3>
+                            <p class="text-slate-400 text-sm">${(p.price/100).toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</p>
+                        </div>
+                        <button onclick='openModal("edit", ${JSON.stringify(p)})' class="text-blue-400 hover:text-white"><i class="ph ph-pencil"></i></button>
+                        <button onclick='deleteProduct(${p.id})' class="text-red-400 hover:text-white ml-2"><i class="ph ph-trash"></i></button>
                     </div>
-                    <button onclick='openModal("edit", ${JSON.stringify(p)})' class="text-blue-400 hover:text-white"><i class="ph ph-pencil"></i></button>
-                    <button onclick='deleteProduct(${p.id})' class="text-red-400 hover:text-white ml-2"><i class="ph ph-trash"></i></button>
-                </div>
-            `).join('');
+                `).join('');
+            } catch(e) {
+                console.error("Erro ao carregar dados do admin:", e);
+            }
         }
 
         function openModal(mode, p = null) {
@@ -120,6 +127,7 @@
             if(mode === 'create') {
                 document.getElementById('pId').value = ''; document.getElementById('pName').value = '';
                 document.getElementById('pPrice').value = ''; document.getElementById('pDesc').value = '';
+                document.getElementById('pImage').value = ''; document.getElementById('pType').value = 'bump';
             } else {
                 document.getElementById('pId').value = p.id; document.getElementById('pType').value = p.type;
                 document.getElementById('pName').value = p.name; document.getElementById('pPrice').value = (p.price/100).toFixed(2).replace('.',',');

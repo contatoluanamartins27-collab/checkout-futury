@@ -1176,109 +1176,96 @@
         }, 1000);
     }
 
-    async function handlePayment() {
-        if (!validateForm()) {
-            return;
-        }
-        
-        // Calcular valor total
-        let finalValueInCents = mainProduct.price;
-        orderBumps.forEach(bump => {
-            const checkbox = document.getElementById(bump.id);
-            if (checkbox && checkbox.checked) {
-                finalValueInCents += bump.price;
+async function handlePayment() {
+            if (!validateForm()) {
+                return;
             }
-        });
-        
-        payButton.textContent = 'Gerando PIX...';
-        payButton.disabled = true;
-        
-        try {
-            // Envia para o PHP (save_customer.php)
-            const response = await fetch('save_customer.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    valueInCents: finalValueInCents,
-                    customer: {
-                        name: document.getElementById('customer-name').value,
-                        phone: document.getElementById('customer-phone').value.replace(/\D/g, '')
-                    }
-                })
+            
+            // Calcular valor total
+            let finalValueInCents = mainProduct.price;
+            orderBumps.forEach(bump => {
+                const checkbox = document.getElementById(bump.id);
+                if (checkbox && checkbox.checked) {
+                    finalValueInCents += bump.price;
+                }
             });
             
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Não foi possível gerar o PIX.');
-            }
+            payButton.textContent = 'Gerando PIX...';
+            payButton.disabled = true;
             
-            const pixData = await response.json();
-            
-            // Mostrar modal com QR Code
-            qrCodeImg.src = pixData.qr_code_base64;
-            pixCodeInput.value = pixData.qr_code;
-            pixModal.style.display = 'flex';
-            
-            // --- LINHA NOVA: MUDA A URL PARA /CHECKOUT ---
-            window.history.pushState({}, "", "/checkout");
-
-            startPixTimer(15 * 60);
-
-            // --- NOVO: LÓGICA DE VERIFICAÇÃO AUTOMÁTICA ---
-            const idDoCliente = pixData.local_id; // ID que veio do PHP
-            const statusDiv = document.querySelector('.payment-status');
-            const statusTexto = statusDiv.querySelector('span');
-
-            // Limpa verificação anterior se houver
-            if(paymentCheckInterval) clearInterval(paymentCheckInterval);
-
-            // Loop a cada 3 segundos
-            paymentCheckInterval = setInterval(async () => {
-                try {
-                    const req = await fetch(`check_status.php?id=${idDoCliente}`);
-                    const res = await req.json();
-
-                    if (res.status === 'pago') {
-                        clearInterval(paymentCheckInterval); // Para o loop
-
-                        // Muda visual para sucesso (Verde)
-                        statusDiv.style.backgroundColor = '#dcfce7'; 
-                        statusDiv.style.border = '1px solid #16a34a';
-                        statusDiv.querySelector('svg').style.display = 'none'; // Esconde spinner
-                        statusTexto.innerHTML = '✅ <b>PAGAMENTO APROVADO!</b>';
-                        statusTexto.style.color = '#15803d';
-                        
-                        document.querySelector('.approval-notice').style.display = 'none';
-
-                        setTimeout(() => {
-                            window.location.href = "obrigado.html"; 
-                        }, 1500);
-                    }
-                } catch (erro) {
-                    console.error("Erro verificação:", erro);
-                }
-            }, 3000);
-
-             // Dispara evento de checkout do Pinterest
             try {
-                let finalValue = finalValueInCents / 100;
-                pintrk('track', 'checkout', {
-                    event_id: 'checkout_' + new Date().getTime(),
-                    value: finalValue.toFixed(2),
-                    order_quantity: 1,
-                    currency: 'BRL'
+                // Envia para o backend
+                const response = await fetch('save_customer.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        valueInCents: finalValueInCents,
+                        customer: {
+                            name: document.getElementById('customer-name').value,
+                            phone: document.getElementById('customer-phone').value.replace(/\D/g, '')
+                        }
+                    })
                 });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Não foi possível gerar o PIX.');
+                }
+                
+                const pixData = await response.json();
+                
+                // Mostrar modal com QR Code
+                qrCodeImg.src = pixData.qr_code_base64;
+                pixCodeInput.value = pixData.qr_code;
+                pixModal.style.display = 'flex';
+                
+                // Muda a URL para /checkout
+                window.history.pushState({}, "", "/checkout");
 
-            } catch (e) { console.error('Erro Pinterest:', e); }
+                startPixTimer(15 * 60);
+
+                // Inicia a verificação de pagamento
+                const idDoCliente = pixData.local_id;
+                const statusDiv = document.querySelector('.payment-status');
+                const statusTexto = statusDiv.querySelector('span');
+
+                if(paymentCheckInterval) clearInterval(paymentCheckInterval);
+
+                paymentCheckInterval = setInterval(async () => {
+                    try {
+                        const req = await fetch(`check_status.php?id=${idDoCliente}`);
+                        const res = await req.json();
+
+                        if (res.status === 'pago') {
+                            clearInterval(paymentCheckInterval);
+
+                            // Muda visual para sucesso
+                            statusDiv.style.backgroundColor = '#dcfce7'; 
+                            statusDiv.style.border = '1px solid #16a34a';
+                            statusDiv.querySelector('svg').style.display = 'none';
+                            statusTexto.innerHTML = '✅ <b>PAGAMENTO APROVADO!</b>';
+                            statusTexto.style.color = '#15803d';
+                            
+                            document.querySelector('.approval-notice').style.display = 'none';
+
+                            // Redireciona para página de obrigado
+                            setTimeout(() => {
+                                window.location.href = "obrigado.html"; 
+                            }, 1500);
+                        }
+                    } catch (erro) {
+                        console.error("Erro verificação:", erro);
+                    }
+                }, 3000);
             
-        } catch (error) {
-            console.error('Erro na geração do PIX:', error);
-            alert(error.message);
-        } finally {
-            payButton.textContent = 'Pagar com PIX';
-            payButton.disabled = false;
-        }
-    }
+            } catch (error) { // ESTE É O 'CATCH' DO ERRO PRINCIPAL
+                console.error('Erro na geração do PIX:', error);
+                alert(error.message);
+            } finally { // ESTE 'FINALLY' REATIVA O BOTÃO SE DER ERRO
+                payButton.textContent = 'Pagar com PIX';
+                payButton.disabled = false;
+            }
+        } // FIM DA FUNÇÃO handlePayment
     
     // Copiar código PIX
     copyPixBtn.addEventListener('click', () => {
@@ -1313,6 +1300,7 @@
 </script>
 </body>
 </html>
+
 
 
 

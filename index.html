@@ -1215,6 +1215,7 @@ async function handlePayment() {
                         valueInCents: finalValueInCents,
                         customer: {
                             name: document.getElementById('customer-name').value,
+                             email: email, // <-- ADICIONE ESTA LINHA
                             phone: document.getElementById('customer-phone').value.replace(/\D/g, '')
                         }
                     })
@@ -1322,6 +1323,7 @@ async function handlePayment() {
 </script>
 </body>
 </html>
+
 
 
 

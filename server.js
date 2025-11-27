@@ -21,9 +21,61 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
+// --- CONFIGURAÇÕES IMPORTANTES (MIDDLEWARES) ---
 app.use(cors());
-app.use(express.json());
+
+// Permite receber JSON
+app.use(express.json()); 
+
+// Permite receber dados de formulário (Correção para o erro undefined)
+app.use(express.urlencoded({ extended: true })); 
+
 app.use(express.static(path.join(__dirname, '.')));
+
+// --- ROTA: WEBHOOK (CORRIGIDA) ---
+app.post('/webhook', async (req, res) => {
+    try {
+        console.log("🔔 Webhook recebido!");
+        
+        // Verificação de segurança: Se o corpo vier vazio, não quebra o servidor
+        if (!req.body) {
+            console.error("❌ Erro: Corpo da requisição vazio (undefined)");
+            return res.status(400).json({ error: "No body received" });
+        }
+
+        console.log("📦 Dados recebidos:", JSON.stringify(req.body, null, 2));
+
+        // Tenta pegar os dados de várias formas possíveis
+        const id = req.body.id || req.body.transaction_id;
+        const status = req.body.status;
+
+        if (!id) {
+            console.error("❌ Erro: ID não encontrado no webhook");
+            return res.status(200).send('ID missing but received'); // Retorna 200 pra não travar a API deles
+        }
+
+        const statusLower = status ? status.toLowerCase() : '';
+
+        if (statusLower === 'paid' || statusLower === 'approved') {
+            console.log(`✅ Pagamento APROVADO. Atualizando TXID: ${id}`);
+            
+            // Atualiza para PAGO
+            const [updateResult] = await pool.query(
+                'UPDATE customers SET status = "pago" WHERE txid = ?', 
+                [id]
+            );
+            console.log("Linhas atualizadas:", updateResult.affectedRows);
+        } else {
+            console.log(`ℹ️ Status recebido: ${status} (Não é aprovação)`);
+        }
+
+        res.status(200).json({ received: true });
+
+    } catch (error) {
+        console.error("❌ ERRO CRÍTICO NO WEBHOOK:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // --- ROTA: BUSCAR PRODUTOS ---
 app.get('/get_products.php', async (req, res) => {
@@ -40,15 +92,14 @@ app.get('/get_products.php', async (req, res) => {
 app.post('/save_customer.php', async (req, res) => {
     const { customer, valueInCents } = req.body;
     try {
-        // 1. Salva cliente
         const [result] = await pool.query(
             "INSERT INTO customers (name, phone, valor, status) VALUES (?, ?, ?, 'pendente')",
             [customer.name, customer.phone, valueInCents]
         );
         const customerId = result.insertId;
 
-        // 2. Gera Pix na PushInPay
         const webhookUrl = `${process.env.BASE_URL}/webhook`;
+        
         const pushRes = await fetch('https://api.pushinpay.com.br/api/pix/cashIn', {
             method: 'POST',
             headers: {
@@ -62,7 +113,6 @@ app.post('/save_customer.php', async (req, res) => {
         const pixData = await pushRes.json();
         if (!pushRes.ok) throw new Error(pixData.message || 'Erro API Pix');
 
-        // 3. Atualiza TXID no banco
         await pool.query('UPDATE customers SET txid = ? WHERE id = ?', [pixData.id, customerId]);
 
         res.json({ ...pixData, local_id: customerId });
@@ -73,48 +123,13 @@ app.post('/save_customer.php', async (req, res) => {
     }
 });
 
-// --- ROTA: CHECAR STATUS (Para o Checkout) ---
+// --- ROTA: CHECAR STATUS ---
 app.get('/check_status.php', async (req, res) => {
     try {
         const [rows] = await pool.query("SELECT status FROM customers WHERE id = ?", [req.query.id]);
         res.json({ status: rows.length > 0 ? rows[0].status : 'erro' });
     } catch (error) {
         res.json({ status: 'erro' });
-    }
-});
-
-// --- ROTA: WEBHOOK (CORRIGIDA E BLINDADA) ---
-app.post('/webhook', async (req, res) => {
-    try {
-        console.log("🔔 Webhook recebido:", req.body); // Vai aparecer no Log do Render
-
-        const { id, status, transaction_id } = req.body;
-        
-        // O ID da transação pode vir como 'id' ou 'transaction_id'
-        const txid = id || transaction_id;
-        
-        // Normaliza o status (para minúsculo)
-        const statusLower = status ? status.toLowerCase() : '';
-
-        if (statusLower === 'paid' || statusLower === 'approved') {
-            console.log(`Tentando aprovar TXID: ${txid}`);
-            
-            // Atualiza para PAGO
-            const [updateResult] = await pool.query(
-                'UPDATE customers SET status = "pago" WHERE txid = ?', 
-                [txid]
-            );
-            
-            console.log("Linhas afetadas no banco:", updateResult.affectedRows);
-        }
-
-        // Retorna 200 OK para a PushInPay parar de mandar erro
-        res.status(200).json({ received: true });
-
-    } catch (error) {
-        console.error("❌ ERRO NO WEBHOOK:", error);
-        // Retornamos 500 aqui só para você ver o erro no painel da PushInPay se der ruim
-        res.status(500).json({ error: error.message });
     }
 });
 

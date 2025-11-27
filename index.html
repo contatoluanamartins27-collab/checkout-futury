@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Fábrica de Amigurumis</title>
     
-    <!-- Pinterest Tag (ATUALIZADO COM ENHANCED MATCH) -->
+<!-- Pinterest Tag (ATUALIZADO COM ENHANCED MATCH E add_to_cart) -->
     <script>
     !function(e){if(!window.pintrk){window.pintrk = function () {
     window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
@@ -13,8 +13,30 @@
       t=document.createElement("script");t.async=!0,t.src=e;var
       r=document.getElementsByTagName("script")[0];
       r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
-    pintrk('load', '2613447856261', {em: '<user_email_address>'});
+    
+    // --- CÓDIGO BASE COM ENHANCED MATCH (SE TIVER E-MAIL) ---
+    // (O e-mail será preenchido pelo JavaScript se já tiver sido salvo)
+    let initialEmail = '';
+    try {
+        const storedData = JSON.parse(localStorage.getItem('purchaseData'));
+        if (storedData && storedData.email) {
+            initialEmail = storedData.email;
+        }
+    } catch (e) { /* ignore */ }
+
+    pintrk('load', '2613447856261', {em: initialEmail || '<user_email_address>'}); 
     pintrk('page');
+
+    // --- NOVO: DISPARA O EVENTO ADD_TO_CART AO CARREGAR O CHECKOUT ---
+    // Este evento é disparado assim que a página de checkout é carregada.
+    // Usaremos um ID genérico por enquanto, pois o ID real só vem após o Pix ser gerado.
+    pintrk('track', 'addtocart', {
+        event_id: 'addtocart_' + new Date().getTime(), // ID único para este evento
+        value: 1.00, // Valor base (produto principal)
+        order_quantity: 1,
+        currency: 'BRL'
+        // 'em' não é enviado aqui porque ainda não temos o e-mail preenchido
+    });
     </script>
     <noscript>
     <img height="1" width="1" style="display:none;" alt=""
@@ -1323,6 +1345,7 @@ async function handlePayment() {
 </script>
 </body>
 </html>
+
 
 
 

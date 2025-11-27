@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Futury</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: { colors: { dark: { 900: '#0f172a', 800: '#1e293b' }, brand: { 500: '#3b82f6' } } } } }</script>
+    <style>body { background-color: #0b1120; color: #e2e8f0; }</style>
+</head>
+<body class="flex h-screen overflow-hidden">
+    
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 p-4 hidden md:block">
+        <h1 class="text-brand-500 font-bold text-xl mb-8 flex gap-2"><i class="ph-fill ph-rocket-launch"></i> Futury</h1>
+        <button onclick="showTab('dashboard')" class="w-full text-left p-3 rounded hover:bg-slate-800 text-white mb-2 flex gap-2 items-center"><i class="ph ph-chart-bar"></i> Dashboard</button>
+        <button onclick="showTab('products')" class="w-full text-left p-3 rounded hover:bg-slate-800 text-slate-400 flex gap-2 items-center"><i class="ph ph-package"></i> Produtos</button>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <!-- DASHBOARD -->
+        <div id="tab-dashboard">
+            <h2 class="text-2xl font-bold text-white mb-6">Visão Geral</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                    <p class="text-slate-400 text-sm">Faturamento</p>
+                    <h3 class="text-3xl font-bold text-white" id="dash-faturamento">R$ 0,00</h3>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                    <p class="text-slate-400 text-sm">Vendas Pagas</p>
+                    <h3 class="text-3xl font-bold text-green-500" id="dash-pagas">0</h3>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                    <p class="text-slate-400 text-sm">Pendentes</p>
+                    <h3 class="text-3xl font-bold text-yellow-500" id="dash-pendentes">0</h3>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+                <div class="p-4 border-b border-slate-700 font-bold text-white">Últimas Vendas</div>
+                <table class="w-full text-left text-sm text-slate-400">
+                    <thead class="bg-slate-900/50 text-xs uppercase"><tr><th class="p-4">Cliente</th><th class="p-4">Valor</th><th class="p-4">Status</th></tr></thead>
+                    <tbody class="divide-y divide-slate-700" id="sales-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PRODUTOS -->
+        <div id="tab-products" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">Produtos</h2>
+                <button onclick="openModal('create')" class="bg-brand-500 text-white px-4 py-2 rounded hover:bg-brand-600">Novo Produto</button>
+            </div>
+            <div id="products-list" class="grid gap-4"></div>
+        </div>
+    </main>
+
+    <!-- MODAL PRODUTO -->
+    <div id="prodModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+        <div class="bg-slate-800 p-6 rounded-xl w-full max-w-md border border-slate-700">
+            <h3 class="text-xl font-bold text-white mb-4" id="modalTitle">Produto</h3>
+            <div class="space-y-3">
+                <input type="hidden" id="pId">
+                <select id="pType" class="w-full bg-slate-900 border border-slate-700 p-2 rounded text-white"><option value="main">Principal</option><option value="bump">Order Bump</option></select>
+                <input type="text" id="pName" placeholder="Nome" class="w-full bg-slate-900 border border-slate-700 p-2 rounded text-white">
+                <input type="text" id="pPrice" placeholder="Preço (R$)" class="w-full bg-slate-900 border border-slate-700 p-2 rounded text-white">
+                <input type="text" id="pImage" placeholder="URL Imagem" class="w-full bg-slate-900 border border-slate-700 p-2 rounded text-white">
+                <input type="text" id="pDesc" placeholder="Descrição" class="w-full bg-slate-900 border border-slate-700 p-2 rounded text-white">
+            </div>
+            <div class="mt-6 flex gap-2">
+                <button onclick="closeModal()" class="flex-1 bg-slate-700 text-white py-2 rounded">Cancelar</button>
+                <button onclick="saveProduct()" class="flex-1 bg-brand-500 text-white py-2 rounded">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAction = 'create';
+
+        function showTab(tab) {
+            document.getElementById('tab-dashboard').classList.add('hidden');
+            document.getElementById('tab-products').classList.add('hidden');
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+        }
+
+        async function loadData() {
+            const res = await fetch('/api/admin-data').then(r => r.json());
+            
+            // Dashboard
+            document.getElementById('dash-faturamento').innerText = (res.pago.total/100).toLocaleString('pt-br',{style:'currency', currency:'BRL'});
+            document.getElementById('dash-pagas').innerText = res.pago.qtd;
+            document.getElementById('dash-pendentes').innerText = res.pendente.qtd;
+
+            // Tabela
+            document.getElementById('sales-table').innerHTML = res.ultimas_vendas.map(v => `
+                <tr>
+                    <td class="p-4 text-white">${v.name} <br> <small class="text-slate-500">${v.phone}</small></td>
+                    <td class="p-4 text-white">${(v.valor/100).toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${v.status === 'pago' ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}">${v.status}</span></td>
+                </tr>
+            `).join('');
+
+            // Produtos
+            document.getElementById('products-list').innerHTML = res.produtos.map(p => `
+                <div class="bg-slate-800 p-4 rounded flex gap-4 items-center border border-slate-700">
+                    <img src="${p.image_url}" class="w-16 h-16 rounded object-cover">
+                    <div class="flex-1">
+                        <h3 class="text-white font-bold">${p.name}</h3>
+                        <p class="text-slate-400 text-sm">${(p.price/100).toLocaleString('pt-br',{style:'currency', currency:'BRL'})}</p>
+                    </div>
+                    <button onclick='openModal("edit", ${JSON.stringify(p)})' class="text-blue-400 hover:text-white"><i class="ph ph-pencil"></i></button>
+                    <button onclick='deleteProduct(${p.id})' class="text-red-400 hover:text-white ml-2"><i class="ph ph-trash"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function openModal(mode, p = null) {
+            currentAction = mode;
+            document.getElementById('prodModal').classList.remove('hidden');
+            document.getElementById('prodModal').classList.add('flex');
+            if(mode === 'create') {
+                document.getElementById('pId').value = ''; document.getElementById('pName').value = '';
+                document.getElementById('pPrice').value = ''; document.getElementById('pDesc').value = '';
+            } else {
+                document.getElementById('pId').value = p.id; document.getElementById('pType').value = p.type;
+                document.getElementById('pName').value = p.name; document.getElementById('pPrice').value = (p.price/100).toFixed(2).replace('.',',');
+                document.getElementById('pImage').value = p.image_url; document.getElementById('pDesc').value = p.description;
+            }
+        }
+
+        function closeModal() { document.getElementById('prodModal').classList.add('hidden'); document.getElementById('prodModal').classList.remove('flex'); }
+
+        async function saveProduct() {
+            const data = {
+                action: currentAction,
+                id: document.getElementById('pId').value,
+                type: document.getElementById('pType').value,
+                name: document.getElementById('pName').value,
+                price: document.getElementById('pPrice').value,
+                image: document.getElementById('pImage').value,
+                description: document.getElementById('pDesc').value
+            };
+            await fetch('/api/admin-product', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+            closeModal(); loadData();
+        }
+
+        async function deleteProduct(id) {
+            if(confirm('Excluir?')) {
+                await fetch('/api/admin-product', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ action: 'delete', id }) });
+                loadData();
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>

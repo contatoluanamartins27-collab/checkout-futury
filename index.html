@@ -13,12 +13,12 @@
       t=document.createElement("script");t.async=!0,t.src=e;var
       r=document.getElementsByTagName("script")[0];
       r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
-    pintrk('load', '2613216526091'); // IMPORTANTE: Coloque seu ID aqui
+    pintrk('load', '2614289656906'); // IMPORTANTE: Coloque seu ID aqui
     pintrk('page');
     </script>
     <noscript>
     <img height="1" width="1" style="display:none;" alt=""
-      src="https://ct.pinterest.com/v3/?event=init&tid=2613216526091&noscript=1" />
+      src="https://ct.pinterest.com/v3/?event=init&tid=2614289656906&noscript=1" />
     </noscript>
     <!-- end Pinterest Tag -->
 
@@ -1218,7 +1218,11 @@
                 qrCodeImg.src = pixData.qr_code_base64;
                 pixCodeInput.value = pixData.qr_code;
                 pixModal.style.display = 'flex';
-                startPixTimer(15 * 60); 
+                
+                // --- LINHA NOVA: MUDA A URL PARA /CHECKOUT ---
+                window.history.pushState({}, "", "/checkout");
+
+                startPixTimer(15 * 60);
 
                 // --- NOVO: LÓGICA DE VERIFICAÇÃO AUTOMÁTICA ---
                 const idDoCliente = pixData.local_id; // ID que veio do PHP
@@ -1293,7 +1297,10 @@
             if (e.target === pixModal) {
                 pixModal.style.display = 'none';
                 clearInterval(pixTimerInterval);
-                clearInterval(paymentCheckInterval); // Para a verificação se fechar modal
+                clearInterval(paymentCheckInterval);
+
+                // --- LINHA NOVA: VOLTA A URL PARA O INÍCIO ---
+                window.history.pushState({}, "", "/");
             }
         });
         
@@ -1305,4 +1312,5 @@
     </script>
 </body>
 </html>
+
 

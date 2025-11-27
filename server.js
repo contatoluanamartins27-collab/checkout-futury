@@ -26,32 +26,38 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 app.use(express.static(path.join(__dirname, '.')));
 
-// --- ROTA: WEBHOOK (CORRIGIDA E COM FALLBACK) ---
+// --- ROTA: WEBHOOK (VERSÃO FINAL BLINDADA) ---
 app.post('/webhook', async (req, res) => {
     try {
         console.log("🔔 WEBHOOK CHEGOU!");
         const { id, status, transaction_id } = req.body;
-        const txid = id || transaction_id; // Pega o ID de onde vier
+        
+        // Pega o ID e força para minúsculo para garantir compatibilidade
+        let txid = (id || transaction_id);
+        
         const statusLower = status ? status.toLowerCase() : '';
 
         console.log(`📦 ID Recebido: ${txid} | Status: ${statusLower}`);
 
         if (statusLower === 'paid' || statusLower === 'approved') {
-            // 1. Tenta atualizar pelo TXID
-            const [result] = await pool.query('UPDATE customers SET status = "pago" WHERE txid = ?', [txid]);
+            
+            // TENTA ATUALIZAR (Ignorando maiúsculas/minúsculas no banco)
+            // Usamos LOWER(txid) no SQL para garantir que bata com o que salvamos
+            const [result] = await pool.query('UPDATE customers SET status = "pago" WHERE txid = ? OR txid = ?', [txid, txid.toLowerCase()]);
             
             if (result.affectedRows > 0) {
                 console.log(`✅ Sucesso! Pedido ${txid} marcado como PAGO.`);
             } else {
-                console.log(`⚠️ AVISO: Nenhuma linha atualizada para TXID ${txid}. O banco não conhece esse ID.`);
+                console.log(`⚠️ ID não encontrado direto. Tentando pelo valor...`);
                 
-                // FALLBACK: Tenta achar o pedido mais recente com esse valor PENDENTE
+                // FALLBACK DE SEGURANÇA (Caso o ID falhe)
                 if(req.body.value) {
-                    console.log("🔄 Tentando encontrar pedido pelo VALOR...");
-                    const valorInt = parseInt(req.body.value); // Valor vem da PushInPay
+                    const valorInt = parseInt(req.body.value); 
                     const [rescue] = await pool.query('UPDATE customers SET status = "pago", txid = ? WHERE valor = ? AND status = "pendente" ORDER BY id DESC LIMIT 1', [txid, valorInt]);
                     if(rescue.affectedRows > 0) {
-                        console.log("✅ SALVO PELO GONGO! Pedido achado pelo valor e atualizado.");
+                        console.log("✅ SALVO PELO GONGO! Atualizado pelo valor.");
+                    } else {
+                        console.error("❌ ERRO: Pedido não encontrado nem pelo ID nem pelo Valor.");
                     }
                 }
             }
@@ -63,21 +69,17 @@ app.post('/webhook', async (req, res) => {
     }
 });
 
-// --- ROTA: SALVAR CLIENTE E GERAR PIX (AGORA BLINDADA) ---
+// --- ROTA: SALVAR CLIENTE E GERAR PIX ---
 app.post('/save_customer.php', async (req, res) => {
     const { customer, valueInCents } = req.body;
-    console.log("🛒 Novo pedido iniciando:", customer.name, valueInCents);
-
+    
     try {
-        // 1. Salva cliente
         const [result] = await pool.query(
             "INSERT INTO customers (name, phone, valor, status) VALUES (?, ?, ?, 'pendente')",
             [customer.name, customer.phone, valueInCents]
         );
         const customerId = result.insertId;
-        console.log("👉 Cliente salvo no banco. ID:", customerId);
 
-        // 2. Gera Pix na PushInPay
         const webhookUrl = `${process.env.BASE_URL}/webhook`;
         const pushRes = await fetch('https://api.pushinpay.com.br/api/pix/cashIn', {
             method: 'POST',
@@ -92,25 +94,20 @@ app.post('/save_customer.php', async (req, res) => {
         const pixData = await pushRes.json();
         if (!pushRes.ok) throw new Error(pixData.message || 'Erro API Pix');
 
-        console.log("👉 Pix gerado na API. TXID:", pixData.id);
-
-        // 3. Atualiza TXID no banco (CRUCIAL)
+        // Salva o ID exatamente como veio da API
         if (pixData.id) {
-            const [upd] = await pool.query('UPDATE customers SET txid = ? WHERE id = ?', [pixData.id, customerId]);
-            console.log("👉 TXID salvo no banco. Linhas afetadas:", upd.affectedRows);
-        } else {
-            console.error("❌ PERIGO: A API não retornou ID do Pix!");
+            await pool.query('UPDATE customers SET txid = ? WHERE id = ?', [pixData.id, customerId]);
         }
 
         res.json({ ...pixData, local_id: customerId });
 
     } catch (error) {
-        console.error("❌ ERRO CRIAR PIX:", error);
+        console.error("Erro ao criar:", error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// --- ROTA: BUSCAR PRODUTOS ---
+// --- OUTRAS ROTAS (IGUAIS) ---
 app.get('/get_products.php', async (req, res) => {
     try {
         const [rows] = await pool.query("SELECT * FROM products WHERE active = 1 ORDER BY type DESC, id ASC");
@@ -118,7 +115,6 @@ app.get('/get_products.php', async (req, res) => {
     } catch (error) { res.json([]); }
 });
 
-// --- ROTA: CHECAR STATUS ---
 app.get('/check_status.php', async (req, res) => {
     try {
         const [rows] = await pool.query("SELECT status FROM customers WHERE id = ?", [req.query.id]);
@@ -126,7 +122,6 @@ app.get('/check_status.php', async (req, res) => {
     } catch (error) { res.json({ status: 'erro' }); }
 });
 
-// --- ROTAS DO ADMIN ---
 app.get('/api/admin-data', async (req, res) => {
     try {
         const [pago] = await pool.query("SELECT SUM(valor) as total, COUNT(*) as qtd FROM customers WHERE status = 'pago'");

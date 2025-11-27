@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compra Aprovada!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        // Dispara evento de compra para o Pinterest (opcional)
+        !function(e){if(!window.pintrk){window.pintrk = function () {
+        window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
+          n=window.pintrk;n.queue=[],n.version="3.0";var
+          t=document.createElement("script");t.async=!0,t.src=e;var
+          r=document.getElementsByTagName("script")[0];
+          r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
+        pintrk('load', '2613216526091');
+        pintrk('page');
+        pintrk('track', 'checkout', { value: 1.00, currency: 'BRL' });
+    </script>
+</head>
+<body class="bg-gray-50 h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center border border-gray-100">
+        
+        <!-- Ícone Animado -->
+        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="ph-fill ph-check-circle text-6xl text-green-600"></i>
+        </div>
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Pagamento Aprovado!</h1>
+        <p class="text-gray-500 mb-8">Sua compra foi confirmada com sucesso. Você receberá os detalhes no seu e-mail.</p>
+
+        <!-- Botão de Ação -->
+        <a href="https://seulinkdomaterial.com" class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition transform hover:-translate-y-1 shadow-lg mb-4">
+            ACESSAR MATERIAL AGORA
+        </a>
+
+        <p class="text-xs text-gray-400 mt-4">ID do Pedido: <span id="order-id">#...</span></p>
+    </div>
+
+    <script>
+        // Gera um ID aleatório só visualmente
+        document.getElementById('order-id').innerText = '#' + Math.floor(Math.random() * 1000000);
+    </script>
+
+</body>
+</html>

@@ -147,6 +147,15 @@ app.post('/api/admin-product', async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
+
+// --- NOVO: ROTA PARA /CHECKOUT ---
+app.get('/checkout', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+
+
 app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`);
 });
+

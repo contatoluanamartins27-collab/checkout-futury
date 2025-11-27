@@ -7,16 +7,43 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script>
-        // Dispara evento de compra para o Pinterest (opcional)
+        // Dispara evento de compra para o Pinterest
         !function(e){if(!window.pintrk){window.pintrk = function () {
         window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
           n=window.pintrk;n.queue=[],n.version="3.0";var
           t=document.createElement("script");t.async=!0,t.src=e;var
           r=document.getElementsByTagName("script")[0];
           r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
-        pintrk('load', '2613447856261');
-        pintrk('page');
-        pintrk('track', 'checkout', { value: 1.00, currency: 'BRL'});
+        
+        // Tenta pegar os dados salvos no navegador
+        try {
+            const purchaseData = JSON.parse(localStorage.getItem('purchaseData'));
+            
+            // 1. Inicia o Pixel com o E-mail do cliente (isso resolve o "enhanced match")
+            pintrk('load', '2613447856261', { 
+                em: purchaseData ? purchaseData.email : '<user_email_address>'
+            });
+            pintrk('page');
+
+            if (purchaseData) {
+                // 2. Dispara o Evento de Compra com todos os dados
+                pintrk('track', 'checkout', {
+                    value: purchaseData.value,
+                    order_quantity: 1,
+                    currency: 'BRL',
+                    order_id: purchaseData.order_id,
+                    event_id: 'checkout_' + purchaseData.order_id
+                });
+
+                // Limpa os dados
+                localStorage.removeItem('purchaseData');
+            }
+        } catch (e) {
+            console.error("Erro ao disparar pixel:", e);
+            // Fallback
+            pintrk('load', '2613447856261');
+            pintrk('page');
+        }
     </script>
 </head>
 <body class="bg-gray-50 h-screen flex items-center justify-center p-4">
@@ -47,5 +74,6 @@
 </body>
 
 </html>
+
 
 

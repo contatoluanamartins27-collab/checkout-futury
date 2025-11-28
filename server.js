@@ -128,10 +128,29 @@ app.get('/check_status.php', async (req, res) => {
 
 app.get('/api/admin-data', async (req, res) => {
     try {
-        const [pago] = await pool.query("SELECT SUM(valor) as total, COUNT(*) as qtd FROM customers WHERE status = 'pago'");
-        const [pend] = await pool.query("SELECT SUM(valor) as total, COUNT(*) as qtd FROM customers WHERE status != 'pago'");
-        const [vendas] = await pool.query("SELECT * FROM customers ORDER BY id DESC LIMIT 20");
+        const { start, end, product } = req.query;
+        let dateFilter = "";
+        const params = [];
+
+        if (start && end) {
+            dateFilter = " AND created_at BETWEEN ? AND ?";
+            params.push(`${start} 00:00:00`, `${end} 23:59:59`);
+        }
+
+        const buildQuery = (base) => {
+            let q = base;
+            if (dateFilter) q += dateFilter;
+            return q;
+        };
+
+        const [pago] = await pool.query(buildQuery("SELECT SUM(valor) as total, COUNT(*) as qtd FROM customers WHERE status = 'pago'"), params);
+        const [pend] = await pool.query(buildQuery("SELECT SUM(valor) as total, COUNT(*) as qtd FROM customers WHERE status != 'pago'"), params);
+
+        // For the list, we also want to filter
+        const [vendas] = await pool.query(buildQuery("SELECT * FROM customers WHERE 1=1") + " ORDER BY id DESC LIMIT 20", params);
+
         const [prods] = await pool.query("SELECT * FROM products ORDER BY id ASC");
+
         res.json({ pago: pago[0], pendente: pend[0], ultimas_vendas: vendas, produtos: prods });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });

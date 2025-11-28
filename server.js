@@ -21,9 +21,23 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
+// Verifica e cria coluna created_at se não existir
+(async () => {
+    try {
+        await pool.query("SELECT created_at FROM customers LIMIT 1");
+    } catch (e) {
+        console.log("Adicionando coluna created_at...");
+        try {
+            await pool.query("ALTER TABLE customers ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP");
+        } catch (err) {
+            console.error("Erro ao adicionar coluna created_at:", err);
+        }
+    }
+})();
+
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); 
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '.')));
 
 // --- ROTA: SALVAR CLIENTE E GERAR PIX (ATUALIZADA) ---
@@ -82,10 +96,10 @@ app.post('/webhook', async (req, res) => {
                 console.log(`✅ Sucesso! Pedido ${txid} marcado como PAGO.`);
             } else {
                 console.log(`⚠️ ID não encontrado. Tentando pelo valor...`);
-                if(req.body.value) {
-                    const valorInt = parseInt(req.body.value); 
+                if (req.body.value) {
+                    const valorInt = parseInt(req.body.value);
                     const [rescue] = await pool.query('UPDATE customers SET status = "pago", txid = ? WHERE valor = ? AND status = "pendente" ORDER BY id DESC LIMIT 1', [txid, valorInt]);
-                    if(rescue.affectedRows > 0) console.log("✅ SALVO! Atualizado pelo valor.");
+                    if (rescue.affectedRows > 0) console.log("✅ SALVO! Atualizado pelo valor.");
                 }
             }
         }

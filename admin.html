@@ -189,474 +189,269 @@
             <!-- DASHBOARD TAB -->
             <div id="tab-dashboard" class="space-y-6 max-w-7xl mx-auto">
                 <div>
-                    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
-                    <script>
-                        tailwind.config = {
-                            darkMode: 'class',
-                            theme: {
-                                extend: {
-                                    colors: {
-                                        background: '#090e17', // Darker background
-                                        surface: '#111827',    // Card background
-                                        border: '#1f2937',     // Border color
-                                        brand: {
-                                            500: '#2563eb',    // Primary Blue
-                                            600: '#1d4ed8'
-                                        },
-                                        text: {
-                                            main: '#f3f4f6',
-                                            muted: '#9ca3af'
-                                        }
-                                    },
-                                    fontFamily: {
-                                        sans: ['Inter', 'sans-serif'],
-                                    }
-                                }
-                            }
-                        }
-                    </script>
-                    <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+                    <h2 class="text-2xl font-bold text-white">Visão Geral</h2>
+                    <p class="text-slate-400 mt-1">Resumo em tempo real do seu negócio</p>
+                </div>
 
-                        body {
-                            background-color: #090e17;
-                            color: #f3f4f6;
-                            font-family: 'Inter', sans-serif;
-                        }
+                <!-- FILTERS -->
+                <div class="flex flex-wrap gap-4 justify-between items-center">
+                    <div
+                        class="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 text-slate-400 text-xs">
+                        <i class="ph ph-calendar"></i>
+                        <input id="filter-date" type="text"
+                            class="bg-transparent border-none focus:ring-0 text-slate-400 w-52 text-xs p-0"
+                            placeholder="Selecione o período">
+                        <i class="ph ph-caret-down"></i>
+                    </div>
+                    <div
+                        class="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 text-slate-400 text-xs w-48 justify-between">
+                        <select id="filter-product"
+                            class="bg-transparent border-none focus:ring-0 text-slate-400 w-full text-xs p-0 appearance-none">
+                            <option value="">Todos os produtos</option>
+                        </select>
+                        <i class="ph ph-caret-down"></i>
+                    </div>
+                </div>
 
-                        .sidebar-link {
-                            transition: all 0.2s;
-                        }
-
-                        .sidebar-link:hover,
-                        .sidebar-link.active {
-                            background-color: #2563eb;
-                            color: white;
-                        }
-
-                        .sidebar-link.active i {
-                            color: white;
-                        }
-
-                        /* Custom Scrollbar */
-                        ::-webkit-scrollbar {
-                            width: 8px;
-                        }
-
-                        ::-webkit-scrollbar-track {
-                            background: #090e17;
-                        }
-
-                        ::-webkit-scrollbar-thumb {
-                            background: #1f2937;
-                            border-radius: 4px;
-                        }
-
-                        ::-webkit-scrollbar-thumb:hover {
-                            background: #374151;
-                        }
-                    </style>
-                    </head>
-
-                    <body class="flex h-screen overflow-hidden text-sm">
-
-                        <!-- SIDEBAR -->
-                        <aside
-                            class="w-64 bg-[#0b1120] border-r border-border flex flex-col justify-between hidden md:flex">
+                <!-- STATS GRID ROW 1 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- CARD 1 -->
+                    <div class="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <div class="w-12 h-12 bg-brand-500 rounded-full blur-xl"></div>
+                        </div>
+                        <div class="flex justify-between items-start mb-4">
                             <div>
-                                <div class="p-6 flex items-center gap-3">
-                                    <div
-                                        class="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-                                        L</div>
-                                    <h1 class="text-xl font-bold tracking-tight">Futury</h1>
-                                    <span
-                                        class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700">BETA</span>
-                                </div>
-
-                                <nav class="px-4 space-y-1">
-                                    <button onclick="switchTab('dashboard')" id="nav-dashboard"
-                                        class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 font-medium">
-                                        <i class="ph ph-squares-four text-lg"></i> Dashboard
-                                    </button>
-                                    <button onclick="switchTab('products')" id="nav-products"
-                                        class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 font-medium">
-                                        <i class="ph ph-package text-lg"></i> Produtos
-                                    </button>
-                                    <button
-                                        class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 font-medium">
-                                        <i class="ph ph-shopping-cart text-lg"></i> Vendas
-                                    </button>
-                                    <button
-                                        class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 font-medium">
-                                        <i class="ph ph-wallet text-lg"></i> Saldo
-                                    </button>
-                                    <button
-                                        class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 font-medium">
-                                        <i class="ph ph-users text-lg"></i> Membros
-                                    </button>
-                                    <button
-                                        class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 font-medium">
-                                        <i class="ph ph-lightning text-lg"></i> Order Bumps
-                                    </button>
-                                    <button
-                                        class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 font-medium">
-                                        <i class="ph ph-trend-up text-lg"></i> Upsells
-                                    </button>
-                                    <button
-                                        class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 font-medium">
-                                        <i class="ph ph-plugs text-lg"></i> Integrações
-                                    </button>
-                                </nav>
+                                <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Vendas (pagas)
+                                </p>
+                                <h3 class="text-2xl font-bold text-white mt-1" id="dash-faturamento">R$ 0,00</h3>
+                                <p class="text-slate-500 text-xs mt-1"><span id="dash-pagas">0</span> vendas</p>
                             </div>
-
-                            <div class="p-4">
-                                <div class="bg-surface border border-border rounded-xl p-4">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-xs font-bold text-slate-400">PROGRESSO</span>
-                                        <span class="text-xs font-bold text-white">VER</span>
-                                    </div>
-                                    <div class="flex items-end gap-1 mb-2">
-                                        <span class="text-lg font-bold text-white">R$ 607</span>
-                                        <span class="text-xs text-slate-500 mb-1">/ R$ 1k</span>
-                                    </div>
-                                    <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                        <div class="bg-brand-500 h-full w-[61%]"></div>
-                                    </div>
-                                    <div class="flex justify-between mt-2 text-[10px] text-slate-500">
-                                        <span>61% concluído</span>
-                                        <span>Faltam R$392.89</span>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4 flex items-center gap-3 px-2">
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs">
-                                        AM</div>
-                                    <div class="flex-1 overflow-hidden">
-                                        <p class="text-sm font-medium text-white truncate">Andre</p>
-                                        <p class="text-xs text-slate-500 truncate">Usuário</p>
-                                    </div>
-                                    <i class="ph ph-sign-out text-slate-500 hover:text-white cursor-pointer"></i>
-                                </div>
-                            </div>
-                        </aside>
-
-                        <!-- MAIN CONTENT -->
-                        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
-                            <!-- TOPBAR -->
-                            <header
-                                class="h-16 border-b border-border bg-[#0b1120] flex items-center justify-between px-8">
-                                <div class="text-sm text-slate-400">Dashboard</div>
-                                <div class="flex items-center gap-4">
-                                    <button class="text-slate-400 hover:text-white"><i class="ph ph-sun"></i></button>
-                                    <button class="text-slate-400 hover:text-white relative">
-                                        <i class="ph ph-bell"></i>
-                                        <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-                                    </button>
-                                    <div class="h-8 w-[1px] bg-border mx-2"></div>
-                                    <div class="flex items-center gap-2">
-                                        <div
-                                            class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs">
-                                            AI</div>
-                                        <div class="text-xs hidden sm:block">
-                                            <p class="text-white font-medium">Andre Igor Moreira Miranda</p>
-                                            <p class="text-slate-500">Usuario</p>
-                                        </div>
-                                        <i class="ph ph-caret-down text-slate-500 text-xs"></i>
-                                    </div>
-                                </div>
-                            </header>
-
-                            <!-- SCROLLABLE CONTENT -->
-                            <div class="flex-1 overflow-y-auto p-8">
-
-                                <!-- DASHBOARD TAB -->
-                                <div id="tab-dashboard" class="space-y-6 max-w-7xl mx-auto">
-                                    <div>
-                                        <h2 class="text-2xl font-bold text-white">Visão Geral</h2>
-                                        <p class="text-slate-400 mt-1">Resumo em tempo real do seu negócio</p>
-                                    </div>
-
-                                    <!-- FILTERS -->
-                                    <div class="flex flex-wrap gap-4 justify-between items-center">
-                                        <div
-                                            class="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 text-slate-400 text-xs">
-                                            <i class="ph ph-calendar"></i>
-                                            <input id="filter-date" type="text"
-                                                class="bg-transparent border-none focus:ring-0 text-slate-400 w-52 text-xs p-0"
-                                                placeholder="Selecione o período">
-                                            <i class="ph ph-caret-down"></i>
-                                        </div>
-                                        <div
-                                            class="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 text-slate-400 text-xs w-48 justify-between">
-                                            <select id="filter-product"
-                                                class="bg-transparent border-none focus:ring-0 text-slate-400 w-full text-xs p-0 appearance-none">
-                                                <option value="">Todos os produtos</option>
-                                            </select>
-                                            <i class="ph ph-caret-down"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- STATS GRID ROW 1 -->
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        <!-- CARD 1 -->
-                                        <div
-                                            class="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
-                                            <div
-                                                class="absolute right-0 top-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                                                <div class="w-12 h-12 bg-brand-500 rounded-full blur-xl"></div>
-                                            </div>
-                                            <div class="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <p
-                                                        class="text-slate-400 text-xs font-medium uppercase tracking-wider">
-                                                        Vendas (pagas)
-                                                    </p>
-                                                    <h3 class="text-2xl font-bold text-white mt-1"
-                                                        id="dash-faturamento">R$ 0,00</h3>
-                                                    <p class="text-slate-500 text-xs mt-1"><span
-                                                            id="dash-pagas">0</span> vendas</p>
-                                                </div>
-                                                <div
-                                                    class="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-500">
-                                                    <i class="ph ph-check-circle text-xl"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- CARD 2 -->
-                                        <div
-                                            class="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
-                                            <div
-                                                class="absolute right-0 top-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                                                <div class="w-12 h-12 bg-yellow-500 rounded-full blur-xl"></div>
-                                            </div>
-                                            <div class="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <p
-                                                        class="text-slate-400 text-xs font-medium uppercase tracking-wider">
-                                                        Vendas pendentes
-                                                    </p>
-                                                    <h3 class="text-2xl font-bold text-white mt-1"
-                                                        id="dash-pendentes-valor">R$ 0,00</h3>
-                                                    <p class="text-slate-500 text-xs mt-1"><span
-                                                            id="dash-pendentes">0</span> pendentes</p>
-                                                </div>
-                                                <div
-                                                    class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500">
-                                                    <i class="ph ph-clock text-xl"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- CARD 3 -->
-                                        <div
-                                            class="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
-                                            <div class="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <p
-                                                        class="text-slate-400 text-xs font-medium uppercase tracking-wider">
-                                                        Conversão do
-                                                        checkout</p>
-                                                    <h3 class="text-2xl font-bold text-white mt-1">0%</h3>
-                                                    <p class="text-slate-500 text-xs mt-1">0 checkouts iniciados</p>
-                                                </div>
-                                                <div
-                                                    class="w-10 h-10 rounded-lg bg-slate-700/50 flex items-center justify-center text-slate-400">
-                                                    <i class="ph ph-trend-up text-xl"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- STATS GRID ROW 2 -->
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        <div class="bg-surface border border-border rounded-xl p-6">
-                                            <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">
-                                                Vendas de Orderbump</p>
-                                            <h3 class="text-2xl font-bold text-white mt-1">R$ 0,00</h3>
-                                        </div>
-                                        <div class="bg-surface border border-border rounded-xl p-6">
-                                            <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Valor
-                                                Recuperado</p>
-                                            <h3 class="text-2xl font-bold text-white mt-1">R$ 0,00</h3>
-                                        </div>
-                                        <div class="bg-surface border border-border rounded-xl p-6">
-                                            <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">
-                                                Ticket médio</p>
-                                            <h3 class="text-2xl font-bold text-white mt-1" id="dash-ticket">R$ 0,00</h3>
-                                        </div>
-                                    </div>
-
-                                    <!-- CHARTS ROW -->
-                                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        <!-- CHART 1 -->
-                                        <div class="lg:col-span-2 bg-surface border border-border rounded-xl p-6">
-                                            <h3 class="text-white font-bold mb-4">Vendas por Hora</h3>
-                                            <div id="chart-sales-hour" class="w-full h-64"></div>
-                                        </div>
-                                        <!-- CHART 2 -->
-                                        <div class="bg-surface border border-border rounded-xl p-6">
-                                            <h3 class="text-white font-bold mb-4">Vendas por método</h3>
-                                            <div id="chart-sales-method"
-                                                class="w-full h-64 flex items-center justify-center"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- RECENT SALES -->
-                                    <div class="bg-surface border border-border rounded-xl overflow-hidden">
-                                        <div class="p-6 border-b border-border flex justify-between items-center">
-                                            <h3 class="text-white font-bold">Últimas Vendas</h3>
-                                            <button class="text-brand-500 text-xs font-bold hover:underline">VER
-                                                TODAS</button>
-                                        </div>
-                                        <div class="overflow-x-auto">
-                                            <table class="w-full text-left text-sm text-slate-400">
-                                                <thead class="bg-slate-900/50 text-xs uppercase font-medium">
-                                                    <tr>
-                                                        <th class="p-4 font-medium">Cliente</th>
-                                                        <th class="p-4 font-medium">Data</th>
-                                                        <th class="p-4 font-medium">Valor</th>
-                                                        <th class="p-4 font-medium">Status</th>
-                                                        <th class="p-4 font-medium text-right">Ações</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody class="divide-y divide-border" id="sales-table">
-                                                    <!-- JS Populates -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- PRODUCTS TAB -->
-                                <div id="tab-products" class="hidden space-y-6 max-w-7xl mx-auto">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <h2 class="text-2xl font-bold text-white">Produtos</h2>
-                                            <p class="text-slate-400 mt-1">Gerencie seu catálogo</p>
-                                        </div>
-                                        <button onclick="openModal('create')"
-                                            class="bg-brand-500 text-white px-4 py-2 rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2">
-                                            <i class="ph ph-plus"></i> Novo Produto
-                                        </button>
-                                    </div>
-                                    <div id="products-list" class="grid gap-4"></div>
-                                </div>
-
-                            </div>
-                        </main>
-
-                        <!-- MODAL PRODUTO -->
-                        <div id="prodModal"
-                            class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm">
                             <div
-                                class="bg-surface p-6 rounded-xl w-full max-w-md border border-border shadow-2xl transform transition-all scale-100">
-                                <div class="flex justify-between items-center mb-6">
-                                    <h3 class="text-xl font-bold text-white" id="modalTitle">Produto</h3>
-                                    <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i
-                                            class="ph ph-x text-lg"></i></button>
-                                </div>
-
-                                <div class="space-y-4">
-                                    <input type="hidden" id="pId">
-                                    <div>
-                                        <label class="block text-xs text-slate-400 mb-1">Tipo</label>
-                                        <select id="pType"
-                                            class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
-                                            <option value="main">Principal</option>
-                                            <option value="bump">Order Bump</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-slate-400 mb-1">Nome do Produto</label>
-                                        <input type="text" id="pName"
-                                            class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-slate-400 mb-1">Preço (R$)</label>
-                                        <input type="text" id="pPrice"
-                                            class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-slate-400 mb-1">URL da Imagem</label>
-                                        <input type="text" id="pImage"
-                                            class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-slate-400 mb-1">Descrição</label>
-                                        <textarea id="pDesc" rows="3"
-                                            class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="mt-8 flex gap-3">
-                                    <button onclick="closeModal()"
-                                        class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg hover:bg-slate-700 transition-colors font-medium">Cancelar</button>
-                                    <button onclick="saveProduct()"
-                                        class="flex-1 bg-brand-500 text-white py-2.5 rounded-lg hover:bg-brand-600 transition-colors font-medium">Salvar
-                                        Produto</button>
-                                </div>
+                                class="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-500">
+                                <i class="ph ph-check-circle text-xl"></i>
                             </div>
                         </div>
+                    </div>
 
-                        <script>
-                            let currentAction = 'create';
+                    <!-- CARD 2 -->
+                    <div class="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <div class="w-12 h-12 bg-yellow-500 rounded-full blur-xl"></div>
+                        </div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Vendas pendentes
+                                </p>
+                                <h3 class="text-2xl font-bold text-white mt-1" id="dash-pendentes-valor">R$ 0,00</h3>
+                                <p class="text-slate-500 text-xs mt-1"><span id="dash-pendentes">0</span> pendentes</p>
+                            </div>
+                            <div
+                                class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                                <i class="ph ph-clock text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
 
-                            // --- TABS LOGIC ---
-                            function switchTab(tab) {
-                                // Hide all
-                                document.getElementById('tab-dashboard').classList.add('hidden');
-                                document.getElementById('tab-products').classList.add('hidden');
+                    <!-- CARD 3 -->
+                    <div class="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Conversão do
+                                    checkout</p>
+                                <h3 class="text-2xl font-bold text-white mt-1">0%</h3>
+                                <p class="text-slate-500 text-xs mt-1">0 checkouts iniciados</p>
+                            </div>
+                            <div
+                                class="w-10 h-10 rounded-lg bg-slate-700/50 flex items-center justify-center text-slate-400">
+                                <i class="ph ph-trend-up text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                // Deactivate navs
-                                document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active', 'bg-brand-500', 'text-white'));
-                                document.querySelectorAll('.sidebar-link i').forEach(el => el.classList.remove('text-white'));
+                <!-- STATS GRID ROW 2 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-surface border border-border rounded-xl p-6">
+                        <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Vendas de Orderbump</p>
+                        <h3 class="text-2xl font-bold text-white mt-1">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-surface border border-border rounded-xl p-6">
+                        <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Valor Recuperado</p>
+                        <h3 class="text-2xl font-bold text-white mt-1">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-surface border border-border rounded-xl p-6">
+                        <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Ticket médio</p>
+                        <h3 class="text-2xl font-bold text-white mt-1" id="dash-ticket">R$ 0,00</h3>
+                    </div>
+                </div>
 
-                                // Show target
-                                document.getElementById(`tab-${tab}`).classList.remove('hidden');
+                <!-- CHARTS ROW -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- CHART 1 -->
+                    <div class="lg:col-span-2 bg-surface border border-border rounded-xl p-6">
+                        <h3 class="text-white font-bold mb-4">Vendas por Hora</h3>
+                        <div id="chart-sales-hour" class="w-full h-64"></div>
+                    </div>
+                    <!-- CHART 2 -->
+                    <div class="bg-surface border border-border rounded-xl p-6">
+                        <h3 class="text-white font-bold mb-4">Vendas por método</h3>
+                        <div id="chart-sales-method" class="w-full h-64 flex items-center justify-center"></div>
+                    </div>
+                </div>
 
-                                // Activate nav
-                                const navBtn = document.getElementById(`nav-${tab}`);
-                                if (navBtn) {
-                                    navBtn.classList.add('active');
-                                }
-                            }
+                <!-- RECENT SALES -->
+                <div class="bg-surface border border-border rounded-xl overflow-hidden">
+                    <div class="p-6 border-b border-border flex justify-between items-center">
+                        <h3 class="text-white font-bold">Últimas Vendas</h3>
+                        <button class="text-brand-500 text-xs font-bold hover:underline">VER TODAS</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-400">
+                            <thead class="bg-slate-900/50 text-xs uppercase font-medium">
+                                <tr>
+                                    <th class="p-4 font-medium">Cliente</th>
+                                    <th class="p-4 font-medium">Data</th>
+                                    <th class="p-4 font-medium">Valor</th>
+                                    <th class="p-4 font-medium">Status</th>
+                                    <th class="p-4 font-medium text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border" id="sales-table">
+                                <!-- JS Populates -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-                            // --- DATA LOADING ---
-                            async function loadData() {
-                                try {
-                                    const dateRange = document.getElementById('filter-date').value;
-                                    const productId = document.getElementById('filter-product').value;
+            <!-- PRODUCTS TAB -->
+            <div id="tab-products" class="hidden space-y-6 max-w-7xl mx-auto">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Produtos</h2>
+                        <p class="text-slate-400 mt-1">Gerencie seu catálogo</p>
+                    </div>
+                    <button onclick="openModal('create')"
+                        class="bg-brand-500 text-white px-4 py-2 rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2">
+                        <i class="ph ph-plus"></i> Novo Produto
+                    </button>
+                </div>
+                <div id="products-list" class="grid gap-4"></div>
+            </div>
 
-                                    let query = '?';
-                                    if (dateRange && dateRange.includes(' a ')) {
-                                        const [start, end] = dateRange.split(' a ');
-                                        query += `start=${start}&end=${end}&`;
-                                    }
-                                    if (productId) {
-                                        query += `product=${productId}&`;
-                                    }
+        </div>
+    </main>
 
-                                    const res = await fetch(`/api/admin-data${query}`).then(r => r.json());
+    <!-- MODAL PRODUTO -->
+    <div id="prodModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm">
+        <div
+            class="bg-surface p-6 rounded-xl w-full max-w-md border border-border shadow-2xl transform transition-all scale-100">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white" id="modalTitle">Produto</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i
+                        class="ph ph-x text-lg"></i></button>
+            </div>
 
-                                    // Dashboard Stats
-                                    const totalPago = res.pago.total || 0;
-                                    const totalPendente = res.pendente.total || 0;
-                                    const qtdPago = res.pago.qtd || 0;
+            <div class="space-y-4">
+                <input type="hidden" id="pId">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Tipo</label>
+                    <select id="pType"
+                        class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
+                        <option value="main">Principal</option>
+                        <option value="bump">Order Bump</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Nome do Produto</label>
+                    <input type="text" id="pName"
+                        class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Preço (R$)</label>
+                    <input type="text" id="pPrice"
+                        class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">URL da Imagem</label>
+                    <input type="text" id="pImage"
+                        class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Descrição</label>
+                    <textarea id="pDesc" rows="3"
+                        class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors"></textarea>
+                </div>
+            </div>
 
-                                    document.getElementById('dash-faturamento').innerText = (totalPago / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
-                                    document.getElementById('dash-pagas').innerText = qtdPago;
+            <div class="mt-8 flex gap-3">
+                <button onclick="closeModal()"
+                    class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg hover:bg-slate-700 transition-colors font-medium">Cancelar</button>
+                <button onclick="saveProduct()"
+                    class="flex-1 bg-brand-500 text-white py-2.5 rounded-lg hover:bg-brand-600 transition-colors font-medium">Salvar
+                    Produto</button>
+            </div>
+        </div>
+    </div>
 
-                                    document.getElementById('dash-pendentes-valor').innerText = (totalPendente / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
-                                    document.getElementById('dash-pendentes').innerText = res.pendente.qtd;
+    <script>
+        let currentAction = 'create';
 
-                                    // Ticket Médio Calc
-                                    const ticket = qtdPago > 0 ? (totalPago / qtdPago) : 0;
-                                    document.getElementById('dash-ticket').innerText = (ticket / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+        // --- TABS LOGIC ---
+        function switchTab(tab) {
+            // Hide all
+            document.getElementById('tab-dashboard').classList.add('hidden');
+            document.getElementById('tab-products').classList.add('hidden');
 
-                                    // Table
-                                    document.getElementById('sales-table').innerHTML = res.ultimas_vendas.map(v => `
+            // Deactivate navs
+            document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active', 'bg-brand-500', 'text-white'));
+            document.querySelectorAll('.sidebar-link i').forEach(el => el.classList.remove('text-white'));
+
+            // Show target
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+
+            // Activate nav
+            const navBtn = document.getElementById(`nav-${tab}`);
+            if (navBtn) {
+                navBtn.classList.add('active');
+            }
+        }
+
+        // --- DATA LOADING ---
+        async function loadData() {
+            try {
+                const dateRange = document.getElementById('filter-date').value;
+                const productId = document.getElementById('filter-product').value;
+
+                let query = '?';
+                if (dateRange && dateRange.includes(' a ')) {
+                    const [start, end] = dateRange.split(' a ');
+                    query += `start=${start}&end=${end}&`;
+                }
+                if (productId) {
+                    query += `product=${productId}&`;
+                }
+
+                const res = await fetch(`/api/admin-data${query}`).then(r => r.json());
+
+                // Dashboard Stats
+                const totalPago = res.pago.total || 0;
+                const totalPendente = res.pendente.total || 0;
+                const qtdPago = res.pago.qtd || 0;
+
+                document.getElementById('dash-faturamento').innerText = (totalPago / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+                document.getElementById('dash-pagas').innerText = qtdPago;
+
+                document.getElementById('dash-pendentes-valor').innerText = (totalPendente / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+                document.getElementById('dash-pendentes').innerText = res.pendente.qtd;
+
+                // Ticket Médio Calc
+                const ticket = qtdPago > 0 ? (totalPago / qtdPago) : 0;
+                document.getElementById('dash-ticket').innerText = (ticket / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+
+                // Table
+                document.getElementById('sales-table').innerHTML = res.ultimas_vendas.map(v => `
                     <tr class="hover:bg-slate-800/50 transition-colors">
                         <td class="p-4">
                             <div class="flex items-center gap-3">
@@ -685,19 +480,19 @@
                     </tr>
                 `).join('');
 
-                                    // Products Filter Population (Only once)
-                                    const productSelect = document.getElementById('filter-product');
-                                    if (productSelect.options.length === 1 && res.produtos.length > 0) {
-                                        res.produtos.forEach(p => {
-                                            const opt = document.createElement('option');
-                                            opt.value = p.id; // Assuming filtering by ID
-                                            opt.innerText = p.name;
-                                            productSelect.appendChild(opt);
-                                        });
-                                    }
+                // Products Filter Population (Only once)
+                const productSelect = document.getElementById('filter-product');
+                if (productSelect.options.length === 1 && res.produtos.length > 0) {
+                    res.produtos.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id; // Assuming filtering by ID
+                        opt.innerText = p.name;
+                        productSelect.appendChild(opt);
+                    });
+                }
 
-                                    // Products List (Tab)
-                                    document.getElementById('products-list').innerHTML = res.produtos.map(p => `
+                // Products List (Tab)
+                document.getElementById('products-list').innerHTML = res.produtos.map(p => `
                     <div class="bg-surface p-4 rounded-xl flex gap-4 items-center border border-border hover:border-slate-600 transition-colors">
                         <div class="w-16 h-16 rounded-lg bg-slate-800 overflow-hidden flex-shrink-0 border border-border">
                             <img src="${p.image_url}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100?text=Prod'">
@@ -716,109 +511,109 @@
                     </div>
                 `).join('');
 
-                                    renderCharts();
+                renderCharts();
 
-                                } catch (e) {
-                                    console.error("Erro ao carregar dados:", e);
-                                }
-                            }
+            } catch (e) {
+                console.error("Erro ao carregar dados:", e);
+            }
+        }
 
-                            // --- CHARTS ---
-                            function renderCharts() {
-                                // Sales per Hour (Mock)
-                                const options1 = {
-                                    chart: { type: 'area', height: 250, toolbar: { show: false }, background: 'transparent' },
-                                    series: [{ name: 'Vendas', data: [30, 40, 35, 50, 49, 60, 70, 91, 125] }],
-                                    xaxis: { categories: ['00h', '03h', '06h', '09h', '12h', '15h', '18h', '21h', '23h'], labels: { style: { colors: '#9ca3af' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-                                    yaxis: { labels: { style: { colors: '#9ca3af' } } },
-                                    grid: { borderColor: '#1f2937', strokeDashDashArray: 4 },
-                                    colors: ['#2563eb'],
-                                    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.1, stops: [0, 90, 100] } },
-                                    dataLabels: { enabled: false },
-                                    stroke: { curve: 'smooth', width: 2 },
-                                    theme: { mode: 'dark' }
-                                };
-                                const chart1 = new ApexCharts(document.querySelector("#chart-sales-hour"), options1);
-                                chart1.render();
+        // --- CHARTS ---
+        function renderCharts() {
+            // Sales per Hour (Mock)
+            const options1 = {
+                chart: { type: 'area', height: 250, toolbar: { show: false }, background: 'transparent' },
+                series: [{ name: 'Vendas', data: [30, 40, 35, 50, 49, 60, 70, 91, 125] }],
+                xaxis: { categories: ['00h', '03h', '06h', '09h', '12h', '15h', '18h', '21h', '23h'], labels: { style: { colors: '#9ca3af' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+                yaxis: { labels: { style: { colors: '#9ca3af' } } },
+                grid: { borderColor: '#1f2937', strokeDashArray: 4 },
+                colors: ['#2563eb'],
+                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.1, stops: [0, 90, 100] } },
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 2 },
+                theme: { mode: 'dark' }
+            };
+            const chart1 = new ApexCharts(document.querySelector("#chart-sales-hour"), options1);
+            chart1.render();
 
-                                // Sales Method (Mock)
-                                const options2 = {
-                                    chart: { type: 'donut', height: 250, background: 'transparent' },
-                                    series: [44, 55, 13],
-                                    labels: ['Pix', 'Cartão', 'Boleto'],
-                                    colors: ['#2563eb', '#10b981', '#f59e0b'],
-                                    legend: { position: 'bottom', labels: { colors: '#9ca3af' } },
-                                    stroke: { show: false },
-                                    dataLabels: { enabled: false },
-                                    plotOptions: { pie: { donut: { size: '70%', labels: { show: true, total: { show: true, label: 'Total', color: '#fff' } } } } }
-                                };
-                                const chart2 = new ApexCharts(document.querySelector("#chart-sales-method"), options2);
-                                chart2.render();
-                            }
+            // Sales Method (Mock)
+            const options2 = {
+                chart: { type: 'donut', height: 250, background: 'transparent' },
+                series: [44, 55, 13],
+                labels: ['Pix', 'Cartão', 'Boleto'],
+                colors: ['#2563eb', '#10b981', '#f59e0b'],
+                legend: { position: 'bottom', labels: { colors: '#9ca3af' } },
+                stroke: { show: false },
+                dataLabels: { enabled: false },
+                plotOptions: { pie: { donut: { size: '70%', labels: { show: true, total: { show: true, label: 'Total', color: '#fff' } } } } }
+            };
+            const chart2 = new ApexCharts(document.querySelector("#chart-sales-method"), options2);
+            chart2.render();
+        }
 
-                            // --- MODAL & ACTIONS ---
-                            function openModal(mode, p = null) {
-                                currentAction = mode;
-                                document.getElementById('prodModal').classList.remove('hidden');
-                                document.getElementById('prodModal').classList.add('flex');
+        // --- MODAL & ACTIONS ---
+        function openModal(mode, p = null) {
+            currentAction = mode;
+            document.getElementById('prodModal').classList.remove('hidden');
+            document.getElementById('prodModal').classList.add('flex');
 
-                                if (mode === 'create') {
-                                    document.getElementById('modalTitle').innerText = 'Novo Produto';
-                                    document.getElementById('pId').value = ''; document.getElementById('pName').value = '';
-                                    document.getElementById('pPrice').value = ''; document.getElementById('pDesc').value = '';
-                                    document.getElementById('pImage').value = ''; document.getElementById('pType').value = 'main';
-                                } else {
-                                    document.getElementById('modalTitle').innerText = 'Editar Produto';
-                                    document.getElementById('pId').value = p.id; document.getElementById('pType').value = p.type;
-                                    document.getElementById('pName').value = p.name; document.getElementById('pPrice').value = (p.price / 100).toFixed(2).replace('.', ',');
-                                    document.getElementById('pImage').value = p.image_url; document.getElementById('pDesc').value = p.description;
-                                }
-                            }
+            if (mode === 'create') {
+                document.getElementById('modalTitle').innerText = 'Novo Produto';
+                document.getElementById('pId').value = ''; document.getElementById('pName').value = '';
+                document.getElementById('pPrice').value = ''; document.getElementById('pDesc').value = '';
+                document.getElementById('pImage').value = ''; document.getElementById('pType').value = 'main';
+            } else {
+                document.getElementById('modalTitle').innerText = 'Editar Produto';
+                document.getElementById('pId').value = p.id; document.getElementById('pType').value = p.type;
+                document.getElementById('pName').value = p.name; document.getElementById('pPrice').value = (p.price / 100).toFixed(2).replace('.', ',');
+                document.getElementById('pImage').value = p.image_url; document.getElementById('pDesc').value = p.description;
+            }
+        }
 
-                            function closeModal() {
-                                document.getElementById('prodModal').classList.add('hidden');
-                                document.getElementById('prodModal').classList.remove('flex');
-                            }
+        function closeModal() {
+            document.getElementById('prodModal').classList.add('hidden');
+            document.getElementById('prodModal').classList.remove('flex');
+        }
 
-                            async function saveProduct() {
-                                const data = {
-                                    action: currentAction,
-                                    id: document.getElementById('pId').value,
-                                    type: document.getElementById('pType').value,
-                                    name: document.getElementById('pName').value,
-                                    price: document.getElementById('pPrice').value,
-                                    image: document.getElementById('pImage').value,
-                                    description: document.getElementById('pDesc').value
-                                };
-                                await fetch('/api/admin-product', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-                                closeModal(); loadData();
-                            }
+        async function saveProduct() {
+            const data = {
+                action: currentAction,
+                id: document.getElementById('pId').value,
+                type: document.getElementById('pType').value,
+                name: document.getElementById('pName').value,
+                price: document.getElementById('pPrice').value,
+                image: document.getElementById('pImage').value,
+                description: document.getElementById('pDesc').value
+            };
+            await fetch('/api/admin-product', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            closeModal(); loadData();
+        }
 
-                            async function deleteProduct(id) {
-                                if (confirm('Tem certeza que deseja excluir este produto?')) {
-                                    await fetch('/api/admin-product', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id }) });
-                                    loadData();
-                                }
-                            }
+        async function deleteProduct(id) {
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                await fetch('/api/admin-product', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id }) });
+                loadData();
+            }
+        }
 
-                            // Init Filters
-                            flatpickr("#filter-date", {
-                                mode: "range",
-                                dateFormat: "Y-m-d",
-                                altInput: true,
-                                altFormat: "d/m/Y",
-                                locale: "pt",
-                                defaultDate: [new Date(new Date().setDate(new Date().getDate() - 30)), new Date()],
-                                onChange: function (selectedDates, dateStr, instance) {
-                                    loadData();
-                                }
-                            });
+        // Init Filters
+        flatpickr("#filter-date", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            locale: "pt",
+            defaultDate: [new Date(new Date().setDate(new Date().getDate() - 30)), new Date()],
+            onChange: function (selectedDates, dateStr, instance) {
+                loadData();
+            }
+        });
 
-                            document.getElementById('filter-product').addEventListener('change', loadData);
+        document.getElementById('filter-product').addEventListener('change', loadData);
 
-                            // Init
-                            loadData();
-                        </script>
-                    </body>
+        // Init
+        loadData();
+    </script>
+</body>
 
 </html>

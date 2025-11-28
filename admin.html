@@ -390,6 +390,201 @@
                     class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg hover:bg-slate-700 transition-colors font-medium">Cancelar</button>
                 <button onclick="saveProduct()"
                     class="flex-1 bg-brand-500 text-white py-2.5 rounded-lg hover:bg-brand-600 transition-colors font-medium">Salvar
+                    <div
+                        class="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 text-slate-400 text-xs">
+                        <i class="ph ph-calendar"></i>
+                        <input id="filter-date" type="text"
+                            class="bg-transparent border-none focus:ring-0 text-slate-400 w-52 text-xs p-0"
+                            placeholder="Selecione o período">
+                        <i class="ph ph-caret-down"></i>
+                    </div>
+                    <div
+                        class="flex items-center gap-2 bg-surface border border-border rounded-lg px-3 py-2 text-slate-400 text-xs w-48 justify-between">
+                        <select id="filter-product"
+                            class="bg-transparent border-none focus:ring-0 text-slate-400 w-full text-xs p-0 appearance-none">
+                            <option value="">Todos os produtos</option>
+                        </select>
+                        <i class="ph ph-caret-down"></i>
+                    </div>
+            </div>
+
+            <!-- STATS GRID ROW 1 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- CARD 1 -->
+                <div class="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <div class="w-12 h-12 bg-brand-500 rounded-full blur-xl"></div>
+                    </div>
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Vendas (pagas)
+                            </p>
+                            <h3 class="text-2xl font-bold text-white mt-1" id="dash-faturamento">R$ 0,00</h3>
+                            <p class="text-slate-500 text-xs mt-1"><span id="dash-pagas">0</span> vendas</p>
+                        </div>
+                        <div
+                            class="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-500">
+                            <i class="ph ph-check-circle text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2 -->
+                <div class="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <div class="w-12 h-12 bg-yellow-500 rounded-full blur-xl"></div>
+                    </div>
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Vendas pendentes
+                            </p>
+                            <h3 class="text-2xl font-bold text-white mt-1" id="dash-pendentes-valor">R$ 0,00</h3>
+                            <p class="text-slate-500 text-xs mt-1"><span id="dash-pendentes">0</span> pendentes</p>
+                        </div>
+                        <div
+                            class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                            <i class="ph ph-clock text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3 -->
+                <div class="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Conversão do
+                                checkout</p>
+                            <h3 class="text-2xl font-bold text-white mt-1">0%</h3>
+                            <p class="text-slate-500 text-xs mt-1">0 checkouts iniciados</p>
+                        </div>
+                        <div
+                            class="w-10 h-10 rounded-lg bg-slate-700/50 flex items-center justify-center text-slate-400">
+                            <i class="ph ph-trend-up text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATS GRID ROW 2 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-surface border border-border rounded-xl p-6">
+                    <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Vendas de Orderbump</p>
+                    <h3 class="text-2xl font-bold text-white mt-1">R$ 0,00</h3>
+                </div>
+                <div class="bg-surface border border-border rounded-xl p-6">
+                    <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Valor Recuperado</p>
+                    <h3 class="text-2xl font-bold text-white mt-1">R$ 0,00</h3>
+                </div>
+                <div class="bg-surface border border-border rounded-xl p-6">
+                    <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Ticket médio</p>
+                    <h3 class="text-2xl font-bold text-white mt-1" id="dash-ticket">R$ 0,00</h3>
+                </div>
+            </div>
+
+            <!-- CHARTS ROW -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- CHART 1 -->
+                <div class="lg:col-span-2 bg-surface border border-border rounded-xl p-6">
+                    <h3 class="text-white font-bold mb-4">Vendas por Hora</h3>
+                    <div id="chart-sales-hour" class="w-full h-64"></div>
+                </div>
+                <!-- CHART 2 -->
+                <div class="bg-surface border border-border rounded-xl p-6">
+                    <h3 class="text-white font-bold mb-4">Vendas por método</h3>
+                    <div id="chart-sales-method" class="w-full h-64 flex items-center justify-center"></div>
+                </div>
+            </div>
+
+            <!-- RECENT SALES -->
+            <div class="bg-surface border border-border rounded-xl overflow-hidden">
+                <div class="p-6 border-b border-border flex justify-between items-center">
+                    <h3 class="text-white font-bold">Últimas Vendas</h3>
+                    <button class="text-brand-500 text-xs font-bold hover:underline">VER TODAS</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-400">
+                        <thead class="bg-slate-900/50 text-xs uppercase font-medium">
+                            <tr>
+                                <th class="p-4 font-medium">Cliente</th>
+                                <th class="p-4 font-medium">Data</th>
+                                <th class="p-4 font-medium">Valor</th>
+                                <th class="p-4 font-medium">Status</th>
+                                <th class="p-4 font-medium text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border" id="sales-table">
+                            <!-- JS Populates -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCTS TAB -->
+        <div id="tab-products" class="hidden space-y-6 max-w-7xl mx-auto">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Produtos</h2>
+                    <p class="text-slate-400 mt-1">Gerencie seu catálogo</p>
+                </div>
+                <button onclick="openModal('create')"
+                    class="bg-brand-500 text-white px-4 py-2 rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2">
+                    <i class="ph ph-plus"></i> Novo Produto
+                </button>
+            </div>
+            <div id="products-list" class="grid gap-4"></div>
+        </div>
+
+    </div>
+    </main>
+
+    <!-- MODAL PRODUTO -->
+    <div id="prodModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm">
+        <div
+            class="bg-surface p-6 rounded-xl w-full max-w-md border border-border shadow-2xl transform transition-all scale-100">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white" id="modalTitle">Produto</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i
+                        class="ph ph-x text-lg"></i></button>
+            </div>
+
+            <div class="space-y-4">
+                <input type="hidden" id="pId">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Tipo</label>
+                    <select id="pType"
+                        class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
+                        <option value="main">Principal</option>
+                        <option value="bump">Order Bump</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Nome do Produto</label>
+                    <input type="text" id="pName"
+                        class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Preço (R$)</label>
+                    <input type="text" id="pPrice"
+                        class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">URL da Imagem</label>
+                    <input type="text" id="pImage"
+                        class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Descrição</label>
+                    <textarea id="pDesc" rows="3"
+                        class="w-full bg-background border border-border p-2.5 rounded-lg text-white focus:border-brand-500 focus:outline-none transition-colors"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-8 flex gap-3">
+                <button onclick="closeModal()"
+                    class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg hover:bg-slate-700 transition-colors font-medium">Cancelar</button>
+                <button onclick="saveProduct()"
+                    class="flex-1 bg-brand-500 text-white py-2.5 rounded-lg hover:bg-brand-600 transition-colors font-medium">Salvar
                     Produto</button>
             </div>
         </div>
@@ -397,6 +592,8 @@
 
     <script>
         let currentAction = 'create';
+        let chartSalesHour = null;
+        let chartSalesMethod = null;
 
         // --- TABS LOGIC ---
         function switchTab(tab) {
@@ -421,14 +618,19 @@
         // --- DATA LOADING ---
         async function loadData() {
             try {
-                const dateRange = document.getElementById('filter-date').value;
+                // Get Flatpickr instance
+                const fp = document.getElementById('filter-date')._flatpickr;
                 const productId = document.getElementById('filter-product').value;
 
                 let query = '?';
-                if (dateRange && dateRange.includes(' a ')) {
-                    const [start, end] = dateRange.split(' a ');
+
+                // Robust Date Handling
+                if (fp && fp.selectedDates.length === 2) {
+                    const start = fp.selectedDates[0].toISOString().split('T')[0];
+                    const end = fp.selectedDates[1].toISOString().split('T')[0];
                     query += `start=${start}&end=${end}&`;
                 }
+
                 if (productId) {
                     query += `product=${productId}&`;
                 }
@@ -520,6 +722,10 @@
 
         // --- CHARTS ---
         function renderCharts() {
+            // Destroy existing charts to prevent duplication
+            if (chartSalesHour) chartSalesHour.destroy();
+            if (chartSalesMethod) chartSalesMethod.destroy();
+
             // Sales per Hour (Mock)
             const options1 = {
                 chart: { type: 'area', height: 250, toolbar: { show: false }, background: 'transparent' },
@@ -533,8 +739,8 @@
                 stroke: { curve: 'smooth', width: 2 },
                 theme: { mode: 'dark' }
             };
-            const chart1 = new ApexCharts(document.querySelector("#chart-sales-hour"), options1);
-            chart1.render();
+            chartSalesHour = new ApexCharts(document.querySelector("#chart-sales-hour"), options1);
+            chartSalesHour.render();
 
             // Sales Method (Mock)
             const options2 = {
@@ -547,8 +753,8 @@
                 dataLabels: { enabled: false },
                 plotOptions: { pie: { donut: { size: '70%', labels: { show: true, total: { show: true, label: 'Total', color: '#fff' } } } } }
             };
-            const chart2 = new ApexCharts(document.querySelector("#chart-sales-method"), options2);
-            chart2.render();
+            chartSalesMethod = new ApexCharts(document.querySelector("#chart-sales-method"), options2);
+            chartSalesMethod.render();
         }
 
         // --- MODAL & ACTIONS ---

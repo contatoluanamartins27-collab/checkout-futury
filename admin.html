@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lowify - Admin</title>
+    <title>Futury - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -85,7 +85,7 @@
                 <div
                     class="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">
                     L</div>
-                <h1 class="text-xl font-bold tracking-tight">Lowify</h1>
+                <h1 class="text-xl font-bold tracking-tight">Futury</h1>
                 <span
                     class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700">BETA</span>
             </div>
@@ -439,6 +439,7 @@
                                 <div>
                                     <div class="text-white font-medium text-sm">${v.name}</div>
                                     <div class="text-xs text-slate-500">${v.email || 'Sem e-mail'}</div>
+                                    ${v.phone ? `<a href="https://wa.me/${v.phone.replace(/\D/g, '')}" target="_blank" class="text-xs text-brand-500 hover:text-brand-400 flex items-center gap-1 mt-0.5"><i class="ph-fill ph-whatsapp-logo"></i> ${v.phone}</a>` : ''}
                                 </div>
                             </div>
                         </td>
